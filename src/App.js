@@ -3,7 +3,8 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import './App.css';
 import Landing from './Components/LandingPage';
 import Overview from './Components/Overview';
-import logo from './assets/moneymesh-logo.png'; // ✅ Ensure the file exists at src/assets/moneymesh-logo.png
+import Transaction from './Components/Transaction';
+
 
 // Context setup
 const FinancialContext = createContext();
@@ -26,22 +27,9 @@ function App() {
     <FinancialContext.Provider value={{ financialData, setFinancialData, transactions, setTransactions }}>
       <Router>
         <div className="App">
-          <header className="App-header">
-            <img src={logo} className="App-logo" alt="logo" />
-            <p>
-              Edit <code>src/App.js</code> and save to reload.
-            </p>
-            <a
-              className="App-link"
-              href="https://reactjs.org"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn React
-            </a>
-          </header>
           <Landing />
           <Overview />
+          <Transaction />
         </div>
       </Router>
     </FinancialContext.Provider>

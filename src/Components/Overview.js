@@ -1,39 +1,42 @@
 import React, { useState } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
-import './Overview.css'; // ✅ Ensure this file exists
-import logo from '../assets/moneymesh-logo.png'; // ✅ Correct relative path
-import { useFinancial } from '../App'; // ✅ From context in App.js
+import './Overview.css';
+import logo from '../assets/moneymesh-logo.png';
+import { NavLink } from 'react-router-dom';
+import { useFinancial } from '../App';
 
+// Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Overview = () => {
   const { financialData, setFinancialData, transactions, setTransactions } = useFinancial();
-  const [modal, setModal] = useState(null);
+  const [modal, setModal] = useState(null); // null, 'income', 'expense', 'savings'
   const [formData, setFormData] = useState({ amount: '', description: '', category: '' });
   const [filter, setFilter] = useState('This Month');
 
+  // Filter transactions based on date
   const filteredTransactions = transactions.filter((transaction) => {
     if (filter === 'This Month') {
       return transaction.date.includes('Jul 2025');
     } else if (filter === 'Last Month') {
       return transaction.date.includes('Jun 2025');
     }
-    return true;
+    return true; // Select Period shows all
   });
 
+  // Pie chart data for Expense Statistics (based on income)
   const income = financialData.income || 0;
-
   const chartData = {
     labels: ['Investment and Savings', 'Bills', 'General Upkeep', 'Entertainment', 'Others'],
     datasets: [
       {
         data: [
-          (income * 0.3).toFixed(2),
-          (income * 0.25).toFixed(2),
-          (income * 0.2).toFixed(2),
-          (income * 0.1).toFixed(2),
-          (income * 0.15).toFixed(2),
+          (income * 0.3).toFixed(2), // 30%
+          (income * 0.25).toFixed(2), // 25%
+          (income * 0.2).toFixed(2), // 20%
+          (income * 0.1).toFixed(2), // 10%
+          (income * 0.15).toFixed(2), // 15%
         ],
         backgroundColor: ['#34C759', '#FF3B30', '#007AFF', '#FF9500', '#8E8E93'],
         hoverOffset: 20,
@@ -41,6 +44,7 @@ const Overview = () => {
     ],
   };
 
+  // Pie chart options
   const chartOptions = {
     responsive: true,
     plugins: {
@@ -66,10 +70,10 @@ const Overview = () => {
     },
   };
 
+  // Handle form submission for adding transactions
   const handleAddTransaction = (e) => {
     e.preventDefault();
     const { amount, description, category } = formData;
-
     if (!amount || isNaN(amount) || amount <= 0 || !description || !category) {
       alert('Please fill in all fields with valid data');
       return;
@@ -90,11 +94,11 @@ const Overview = () => {
       [modal]: prev[modal] + parseFloat(amount),
       balance: modal === 'income' ? prev.balance + parseFloat(amount) : prev.balance - parseFloat(amount),
     }));
-
     setFormData({ amount: '', description: '', category: '' });
     setModal(null);
   };
 
+  // Modal component
   const Modal = ({ type }) => (
     <div className="modal-overlay">
       <div className="modal-content">
@@ -148,13 +152,37 @@ const Overview = () => {
 
   return (
     <div className="overview-container">
+      {/* Navbar with logo, nav tabs, and profile */}
       <nav className="navbar">
         <div className="logo-container">
           <img src={logo} alt="MoneyMesh Logo" className="logo" />
           <span className="brand">MoneyMesh</span>
         </div>
+        <div className="nav-tabs">
+          <NavLink to="/overview" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+            Overview
+          </NavLink>
+          <NavLink to="/transactions" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+            Transactions
+          </NavLink>
+          <NavLink to="/budget-planning" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+            Budget Planning
+          </NavLink>
+        </div>
+        <div className="profile-section">
+          <img
+            src="https://i.pravatar.cc/40"
+            alt="User"
+            className="profile-pic"
+          />
+          <div className="profile-info">
+            <span className="welcome">Welcome</span>
+            <span className="username">Purity</span>
+          </div>
+        </div>
       </nav>
 
+      {/* Financial Cards */}
       <div className="cards-container">
         {[
           { title: 'Balance', value: financialData.balance },
@@ -169,12 +197,20 @@ const Overview = () => {
         ))}
       </div>
 
+      {/* Action Buttons */}
       <div className="actions-container">
-        <button onClick={() => setModal('income')} className="btn btn-income">Add Income</button>
-        <button onClick={() => setModal('expense')} className="btn btn-expense">Add Expense</button>
-        <button onClick={() => setModal('savings')} className="btn btn-savings">Add Savings</button>
+        <button onClick={() => setModal('income')} className="btn btn-income">
+          Add Income
+        </button>
+        <button onClick={() => setModal('expense')} className="btn btn-expense">
+          Add Expense
+        </button>
+        <button onClick={() => setModal('savings')} className="btn btn-savings">
+          Add Savings
+        </button>
       </div>
 
+      {/* Filter Dropdown */}
       <div className="filter-container">
         <label htmlFor="filter" className="filter-label">Filter:</label>
         <select
@@ -189,6 +225,7 @@ const Overview = () => {
         </select>
       </div>
 
+      {/* Latest Transactions Table */}
       <div className="table-container">
         <h2 className="table-title">Latest Transactions</h2>
         <table className="transactions-table">
@@ -219,6 +256,7 @@ const Overview = () => {
         </table>
       </div>
 
+      {/* Expense Statistics Pie Chart */}
       <div className="chart-container">
         <h2 className="chart-title">Expense Statistics</h2>
         <div className="pie-chart">
@@ -226,6 +264,7 @@ const Overview = () => {
         </div>
       </div>
 
+      {/* Modal */}
       {modal && <Modal type={modal} />}
     </div>
   );
