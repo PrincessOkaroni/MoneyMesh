@@ -47,3 +47,34 @@ const Transaction = () => {
     setFormData(t);
     setTransactions((prev) => prev.filter((item) => item.id !== t.id));
   };
+   // Download CSV
+  const handleDownload = () => {
+    const headers = "Type,Date,Category,Description,Amount\n";
+    const rows = transactions
+      .map((t) =>
+        [t.type, t.date, t.category, t.description, t.amount].join(",")
+      )
+      .join("\n");
+    const csv = headers + rows;
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "transactions.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Calculate total
+  const totalAmount = transactions.reduce(
+    (sum, t) => sum + parseFloat(t.amount || 0),
+    0
+  );
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h2>Transaction List</h2>
+      <table border="1" cellPadding="6" cellSpacing="0">
+        <thead></thead>
