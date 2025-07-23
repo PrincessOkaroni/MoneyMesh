@@ -84,7 +84,7 @@ const Transaction = () => {
             <th>Category</th>
             <th>Description</th>
             <th>Amount</th>
-            <th>Action</th>
+            <th>Actionn</th>
           </tr>
         </thead>
         <tbody>
