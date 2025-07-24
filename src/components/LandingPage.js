@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import './LandingPage.css';
 import logo from '../assets/moneymesh-logo.png';
+import { useNavigate } from 'react-router-dom';
+import heroLogo from '../assets/herologo.png';
+
+
 
 function LandingPage() {
-  // NEW: Add state to track which form to show
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
 
@@ -18,7 +21,6 @@ function LandingPage() {
           <a href="#features">Features</a>
           <a href="#how-it-works">How It Works</a>
           <a href="#about">About</a>
-          {/* Make these buttons actually show the forms */}
           <button onClick={() => { setShowSignIn(true); setShowSignUp(false); }} className="sign-in">Sign In</button>
           <button onClick={() => { setShowSignUp(true); setShowSignIn(false); }} className="get-started">Get Started</button>
         </div>
@@ -35,36 +37,37 @@ function LandingPage() {
           <p className="hero-note">Trusted by over 1M users</p>
         </div>
         <div className="hero-image">
-          <img src="https://via.placeholder.com/400x300" alt="pic" />
+          <img src={heroLogo} alt="MoneyMesh Hero Logo" className="hero-logo" />
         </div>
       </section>
 
-      {/* Show forms if buttons are clicked */}
+      {/* Show forms */}
       {showSignIn && <SignInForm />}
-      {showSignUp && <SignUpForm />}
+      {showSignUp && <SignUpForm setShowSignIn={setShowSignIn} setShowSignUp={setShowSignUp} />}
 
-      {/* FEATURES SECTION */}
+      {/* ... other sections ... */}
+      {/* FEATURES */}
       <section id="features" className="features">
         <p className="section-label">FEATURES</p>
         <h2>Everything You Need to Master Your Money</h2>
         <div className="feature-cards">
           <div className="feature-card">
-            <img src="https://via.placeholder.com/60" alt="Track Expenses" />
+            <img src="https://img.icons8.com/ios-filled/60/receipt.png" alt="Track Expenses" />
             <h3>Track Expenses</h3>
             <p>Log your daily expenses quickly and easily.</p>
           </div>
           <div className="feature-card">
-            <img src="https://via.placeholder.com/60" alt="Budget Planner" />
+            <img src="https://img.icons8.com/ios-filled/60/budget.png" alt="Budget Planner" />
             <h3>Budget Planner</h3>
             <p>Plan monthly budgets and get alerts when you’re near limits.</p>
           </div>
           <div className="feature-card">
-            <img src="https://via.placeholder.com/60" alt="Visual Reports" />
+            <img src="https://img.icons8.com/ios-filled/60/combo-chart.png" alt="Visual Reports" />
             <h3>Visual Reports</h3>
             <p>See where your money goes with clear charts.</p>
           </div>
           <div className="feature-card">
-            <img src="https://via.placeholder.com/60" alt="Transactions" />
+            <img src="https://img.icons8.com/ios-filled/60/money-transfer.png" alt="Transactions" />
             <h3>Transactions</h3>
             <p>View and manage all your recent transactions in one place.</p>
           </div>
@@ -84,7 +87,7 @@ function LandingPage() {
           <div className="step-card">
             <div className="step-number">2</div>
             <h3>Add Income & Expenses</h3>
-            <p>Log daily transactions to see exactly where your money comes from and where it goes.</p>
+            <p>Log daily transactions to see where your money comes from and goes.</p>
           </div>
           <div className="step-card">
             <div className="step-number">3</div>
@@ -103,8 +106,6 @@ function LandingPage() {
             <p>
               MoneyMesh was created to help everyday people take control of their finances.
               We believe managing your money should be simple, empowering, and even a little fun.
-              From tracking your daily expenses to setting budgets and getting helpful alerts,
-              MoneyMesh is designed to guide you toward financial peace of mind.
             </p>
           </div>
         </div>
@@ -124,7 +125,7 @@ function LandingPage() {
           </div>
           <div className="footer-contact">
             <p>Email: <a href="mailto:support@moneymesh.com">support@moneymesh.com</a></p>
-            <p>Phone: <a href="tel:+254700000000">+254758793305</a></p>
+            <p>Phone: +254758793305</p>
             <p>Location: Nairobi, Kenya</p>
           </div>
         </div>
@@ -135,26 +136,110 @@ function LandingPage() {
 }
 
 function SignInForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // ✅ useNavigate hook to redirect
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Fetch users from db.json to validate
+    fetch('http://localhost:3001/users')
+      .then(res => res.json())
+      .then(users => {
+        const user = users.find(u => u.email === email && u.password === password);
+
+        if (user) {
+          alert('Sign in successful! Redirecting to dashboard...');
+          navigate('/overview');   // Change to '/dashboard' or your route
+        } else {
+          alert('Invalid email or password. Please try again.');
+        }
+      })
+      .catch(err => {
+        console.error('Error signing in:', err);
+        alert('An error occurred. Please try again.');
+      });
+  };
+
   return (
     <div className="auth-container">
       <h2>Sign In to MoneyMesh</h2>
-      <form className="auth-form">
-        <input type="email" placeholder="Email" required />
-        <input type="password" placeholder="Password" required />
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+        />
         <button type="submit">Sign In</button>
       </form>
     </div>
   );
 }
 
-function SignUpForm() {
+function SignUpForm({ setShowSignIn, setShowSignUp }) {
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const newUser = { fullName, email, password };
+
+    fetch('http://localhost:3001/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newUser)
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log('Account created:', data);
+        alert('Account created! Please sign in.');
+        setShowSignIn(true);
+        setShowSignUp(false);
+      })
+      .catch(err => {
+        console.error('Error creating account:', err);
+      });
+  };
+
   return (
     <div className="auth-container">
       <h2>Create Your MoneyMesh Account</h2>
-      <form className="auth-form">
-        <input type="text" placeholder="Full Name" required />
-        <input type="email" placeholder="Email" required />
-        <input type="password" placeholder="Password" required />
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Full Name"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
         <button type="submit">Sign Up</button>
       </form>
     </div>

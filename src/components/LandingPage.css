@@ -331,3 +331,12 @@ background-color:#c9f1d5;
 .auth-form button:hover {
   background-color: #256429;  /* darker green on hover */
 }
+.success-message {
+  color: green;
+  margin-top: 10px;
+}
+.hero-logo {
+  max-width: 300px;
+  height: auto;
+  margin-top: 20px;
+}

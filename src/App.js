@@ -1,35 +1,35 @@
 import React, { useState, createContext, useContext } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Landing from './components/LandingPage';
 import Overview from './components/Overview';
 import Transaction from './components/Transaction';
 
-// Context setup
+
+import BudgetPlanning from './components/BudgetPlanning';
+ 
+
 const FinancialContext = createContext();
 export const useFinancial = () => useContext(FinancialContext);
 
 function App() {
+  // ✅ initialize financialData with all needed fields
   const [financialData, setFinancialData] = useState({
-    balance: 1000,
-    income: 25000,
-    expense: 15000,
-    savings: 9000,
+    income: 0,
+    expense: 0,
+    savings: 0,
+    balance: 0,
   });
-
-  const [transactions, setTransactions] = useState([
-    { id: 1, date: '07 Jan 2030', category: 'Others', description: 'Went for check-up', amount: 250.0, type: 'Income' },
-    { id: 2, date: '10 Jan 2030', category: 'Salary', description: 'Got my salary', amount: 5000.0, type: 'Expense' },
-  ]);
+  const [transactions, setTransactions] = useState([]);
 
   return (
     <FinancialContext.Provider value={{ financialData, setFinancialData, transactions, setTransactions }}>
       <Router>
-        <div className="App">
-          <Landing />
-          <Overview />
-          <Transaction />
-        </div>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/overview" element={<Overview />} />
+          <Route path="/transactions" element={<Transaction />} />
+          <Route path="/budget-planning" element={<BudgetPlanning />} />
+        </Routes>
       </Router>
     </FinancialContext.Provider>
   );
