@@ -1,84 +1,90 @@
-/* Container for side-by-side layout */
-.transaction-section {
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 20px;
+.transaction-container {
   padding: 20px;
-}
-
-/* Table styling */
-table {
-  min-width: 500px;
-  border-collapse: collapse;
   font-family: Arial, sans-serif;
 }
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 10px;
+.transaction-section {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.transaction-table,
+.transaction-form-table {
+  flex: 1;
+  min-width: 480px;
+}
+
+.section-title {
+  margin-bottom: 10px;
   text-align: center;
+  font-size: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+
+th,
+td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
 }
 
 th {
-  background-color: #1133aa;
-  color: white;
+  background-color: #f4f4f4;
 }
 
-tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-/* Transaction form */
-.form-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 300px;
-  padding: 16px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #fdfdfd;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group label {
-  font-weight: bold;
-  margin-bottom: 4px;
-}
-
-input, select {
-  padding: 8px;
-  font-size: 1rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-/* Buttons */
 button {
+  padding: 5px 10px;
+  margin: 2px;
   background-color: #007bff;
   color: white;
   border: none;
   cursor: pointer;
-  padding: 8px;
   border-radius: 4px;
-  margin-top: 6px;
-  transition: background-color 0.3s;
 }
 
 button:hover {
   background-color: #0056b3;
 }
 
-/* Headings */
-h2 {
+input,
+select {
+  width: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.transaction-controls {
   margin-top: 20px;
-  font-size: 1.5rem;
-  text-align: center;
-  color: teal;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  justify-content: space-between;
+  border-top: 2px solid #ddd;
+  padding-top: 15px;
+}
+
+.download-btn {
+  background-color: #28a745;
+}
+
+.download-btn:hover {
+  background-color: #218838;
+}
+
+.date-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-filter label {
+  font-weight: bold;
 }
