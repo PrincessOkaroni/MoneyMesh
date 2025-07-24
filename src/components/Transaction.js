@@ -1,173 +1,224 @@
-import React, { useState } from 'react';
-import './Transaction.css';
+import React, { useState } from "react";
+import "./Transaction.css";
 
-const Transaction = () => {
+function Transaction() {
   const [transactions, setTransactions] = useState([]);
-  const [formData, setFormData] = useState({
-    type: 'Expense',
-    date: '',
-    category: '',
-    description: '',
-    amount: ''
-  });
-
-  const [editIndex, setEditIndex] = useState(null);
-  const [filter, setFilter] = useState({ start: '', end: '' });
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const [type, setType] = useState("Income");
+  const [date, setDate] = useState("");
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const handleAdd = () => {
-    if (!formData.date || !formData.category || !formData.description || !formData.amount) {
-      alert("Please fill in all fields.");
-      return;
-    }
+    if (!date || !category || !description || !amount) return;
 
     const newTransaction = {
-      ...formData,
-      amount: parseFloat(formData.amount)
+      type,
+      date,
+      category,
+      description,
+      amount: parseFloat(amount),
     };
 
-    if (editIndex !== null) {
+    if (editingIndex !== null) {
       const updated = [...transactions];
-      updated[editIndex] = newTransaction;
+      updated[editingIndex] = newTransaction;
       setTransactions(updated);
-      setEditIndex(null);
+      setEditingIndex(null);
     } else {
       setTransactions([...transactions, newTransaction]);
     }
 
-    setFormData({ type: 'Expense', date: '', category: '', description: '', amount: '' });
+    setType("Income");
+    setDate("");
+    setCategory("");
+    setDescription("");
+    setAmount("");
   };
 
   const handleEdit = (index) => {
-    setFormData(transactions[index]);
-    setEditIndex(index);
+    const t = transactions[index];
+    setType(t.type);
+    setDate(t.date);
+    setCategory(t.category);
+    setDescription(t.description);
+    setAmount(t.amount);
+    setEditingIndex(index);
   };
 
   const handleDelete = (index) => {
-    const updated = transactions.filter((_, i) => i !== index);
+    const updated = [...transactions];
+    updated.splice(index, 1);
     setTransactions(updated);
   };
 
-  const handleDownload = () => {
+  const filteredTransactions = transactions.filter((transaction) => {
+    const transactionDate = new Date(transaction.date);
+    const start = startDate ? new Date(startDate) : null;
+    const end = endDate ? new Date(endDate) : null;
+
+    if (start && transactionDate < start) return false;
+    if (end && transactionDate > end) return false;
+    return true;
+  });
+
+  const total = filteredTransactions.reduce(
+    (acc, transaction) =>
+      transaction.type === "Income"
+        ? acc + transaction.amount
+        : acc - transaction.amount,
+    0
+  );
+
+  const totalAmount = filteredTransactions.reduce(
+    (acc, transaction) => acc + transaction.amount,
+    0
+  );
+
+  const downloadCSV = () => {
     const csv = [
-      ['Type', 'Date', 'Category', 'Description', 'Amount'],
-      ...transactions.map((t) => [
+      ["Type", "Date", "Category", "Description", "Amount"],
+      ...filteredTransactions.map((t) => [
         t.type,
         t.date,
         t.category,
         t.description,
-        t.amount
-      ])
+        t.amount.toFixed(2),
+      ]),
     ]
-      .map((row) => row.join(','))
-      .join('\n');
+      .map((row) => row.join(","))
+      .join("\n");
 
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'transactions.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "transactions.csv";
+    a.click();
+    URL.revokeObjectURL(url);
   };
-
-  const filteredTransactions = transactions.filter((t) => {
-    const tDate = new Date(t.date);
-    const start = filter.start ? new Date(filter.start) : null;
-    const end = filter.end ? new Date(filter.end) : null;
-    return (!start || tDate >= start) && (!end || tDate <= end);
-  });
-
-  const total = filteredTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-  const remaining = filteredTransactions.reduce(
-    (sum, t) => t.type === 'Income' ? sum + Number(t.amount) : sum - Number(t.amount),
-    0
-  );
 
   return (
     <div>
-      <h2 style={{ textAlign: 'center', color: 'teal' }}>Transaction List</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Type</th>
-            <th>Date</th>
-            <th>Category</th>
-            <th>Description</th>
-            <th>Amount</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredTransactions.map((transaction, index) => (
-            <tr key={index}>
-              <td>{transaction.type}</td>
-              <td>{new Date(transaction.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
-              <td>{transaction.category}</td>
-              <td>{transaction.description}</td>
-              <td>${Number(transaction.amount).toFixed(2)}</td>
-              <td>
-                <button onClick={() => handleEdit(index)}>Edit</button>
-                <button onClick={() => handleDelete(index)}>Delete</button>
-              </td>
-            </tr>
-          ))}
-          <tr>
-            <td colSpan="4"><strong>Total</strong></td>
-            <td><strong>${total.toFixed(2)}</strong></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td colSpan="4"><strong>Remaining Balance</strong></td>
-            <td><strong>${remaining.toFixed(2)}</strong></td>
-            <td></td>
-          </tr>
-        </tbody>
-      </table>
+      <h2>Transaction List</h2>
+      <div className="transaction-section">
+        {/* Transaction Table */}
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTransactions.map((transaction, index) => (
+                <tr key={index}>
+                  <td>{transaction.type}</td>
+                  <td>
+                    {new Date(transaction.date).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </td>
+                  <td>{transaction.category}</td>
+                  <td>{transaction.description}</td>
+                  <td>${transaction.amount.toFixed(2)}</td>
+                  <td>
+                    <button onClick={() => handleEdit(index)}>Edit</button>{" "}
+                    <button onClick={() => handleDelete(index)}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+              <tr>
+                <td colSpan="4"><strong>Total</strong></td>
+                <td colSpan="2"><strong>${totalAmount.toFixed(2)}</strong></td>
+              </tr>
+              <tr>
+                <td colSpan="4"><strong>Remaining Balance</strong></td>
+                <td colSpan="2">
+                  <strong>${total.toFixed(2)}</strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <h2 style={{ textAlign: 'center', color: 'teal' }}>Transaction Form</h2>
-      <form className="form-layout" onSubmit={(e) => e.preventDefault()}>
-        <div className="form-group">
-          <label>Type</label>
-          <select name="type" value={formData.type} onChange={handleChange}>
-            <option value="Expense">Expense</option>
-            <option value="Income">Income</option>
-          </select>
-        </div>
-        <div className="form-group">
-          <label>Date</label>
-          <input type="date" name="date" value={formData.date} onChange={handleChange} />
-        </div>
-        <div className="form-group">
-          <label>Category</label>
-          <input type="text" name="category" placeholder="Category" value={formData.category} onChange={handleChange} />
-        </div>
-        <div className="form-group">
-          <label>Description</label>
-          <input type="text" name="description" placeholder="Description" value={formData.description} onChange={handleChange} />
-        </div>
-        <div className="form-group">
-          <label>Amount</label>
-          <input type="number" name="amount" placeholder="Amount" value={formData.amount} onChange={handleChange} />
-        </div>
-        <button type="button" onClick={handleAdd}>Add</button>
-      </form>
+        {/* Transaction Form */}
+        <div className="form-layout">
+          <div className="form-group">
+            <label>Type</label>
+            <select value={type} onChange={(e) => setType(e.target.value)}>
+              <option value="Income">Income</option>
+              <option value="Expense">Expense</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label>Category</label>
+            <input
+              type="text"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label>Description</label>
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label>Amount</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </div>
+          <button onClick={handleAdd}>
+            {editingIndex !== null ? "Update" : "Add"}
+          </button>
 
-      <div style={{ textAlign: 'center', marginTop: '10px' }}>
-        <button onClick={handleDownload}>Download CSV</button>
-      </div>
+          <button onClick={downloadCSV}>Download CSV</button>
 
-      <div style={{ textAlign: 'center', marginTop: '10px' }}>
-        <label>From: </label>
-        <input type="date" value={filter.start} onChange={(e) => setFilter({ ...filter, start: e.target.value })} />
-        <label style={{ marginLeft: '10px' }}>To: </label>
-        <input type="date" value={filter.end} onChange={(e) => setFilter({ ...filter, end: e.target.value })} />
+          <div className="form-group">
+            <label>From:</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label>To:</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
-};
+}
 
 export default Transaction;
