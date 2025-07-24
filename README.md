@@ -44,20 +44,69 @@ Users can add transactions (income, expenses, savings), filter transactions by t
 
 - State Management: React Context API
 
+moneymesh/
+
+├── src/
+
+│   ├── App.jsx                   # Main app component with routing and context
+
+│   ├── App.css                   # Styles for the app container and error pages
+
+│   ├── assets/
+
+│   │   └── moneymesh-logo.png    # Logo image for the navbar
+
+│   ├── Components/
+
+│   │   ├── Overview.jsx          # Overview page with navbar, cards, buttons, table, and pie chart
+
+│   │   ├── Overview.css          # Styles for Overview.jsx
+
+│   │   ├── Transaction.jsx       # Transactions page with navbar, buttons, and table
+
+│   │   ├── Transaction.css       # Styles for Transaction.jsx
+
+│   │   ├── BudgetPlanning.jsx    # Budget Planning page (placeholder) with navbar
+
+│   │   ├── BudgetPlanning.css    # Styles for BudgetPlanning.jsx
+
+│   │   ├── LandingPage.jsx       # Landing page with navbar and welcome message
+
+│   │   ├── LandingPage.css       # Styles for LandingPage.jsx
+
+├── public/
+
+│   ├── index.html                # HTML entry point
+
+│   ├── favicon.ico               # Favicon
+
+│   ├── manifest.json             # Web app manifest
+
+├── db.json                       # Mock backend data for financialData and transactions
+
+├── package.json                  # Project dependencies and scripts
+
+├── README.md                     # Project documentation
+
+├── .eslintrc.json                # ESLint configuration
+
 ## Setup Instructions
 
 - Clone the Repository:
 git clone `git@github.com:PrincessOkaroni/MoneyMesh.git`
+
 cd moneymesh
 
 
 Install Dependencies:Ensure Node.js is installed, then run:
+
 ```npm install```
 
 This installs required packages: react, react-dom, react-router-dom, chart.js, react-chartjs-2.
 
 
 Run the Application:Start the development server:
+
 ```npm start```
 
 Install JSON Server for the mock backend:
@@ -71,13 +120,16 @@ Start JSON Server to serve the mock API:
 - Open http://localhost:3000 in your browser. The app redirects to /landingPage by default.
 
 - Build for Production:Create a production build:
+
 ```npm run build```
 
 
 - Linting:Check for linting issues:
+
 ```npm run lint```
 
 - Fix auto-fixable issues:
+
 ```npm run lint -- --fix```
 
 
@@ -99,7 +151,7 @@ Start JSON Server to serve the mock API:
 
 ## Authors
 
-Okaroni Purity - Team Lead
+Okaroni Purity - Team Lead( github - ```https://github.com/PrincessOkaroni```)
 
 Justin Tutu    - Contributor
 
