@@ -1,70 +1,90 @@
 .transaction-container {
-  padding: 30px;
-  font-family: sans-serif;
+  padding: 20px;
+  font-family: Arial, sans-serif;
 }
 
-h2 {
-  color: #222;
+.transaction-section {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.transaction-table,
+.transaction-form-table {
+  flex: 1;
+  min-width: 480px;
+}
+
+.section-title {
   margin-bottom: 10px;
+  text-align: center;
+  font-size: 20px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
-  background-color: #f8faff;
-  border-radius: 10px;
-  overflow: hidden;
+  margin-bottom: 10px;
 }
 
-th {
-  background-color: #2f4fc1;
-  color: white;
-  padding: 12px;
+th,
+td {
+  border: 1px solid #ccc;
+  padding: 8px;
   text-align: left;
 }
 
-td {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
+th {
+  background-color: #546cf5;
 }
 
-tfoot td {
-  font-weight: bold;
-  background-color: #eef;
+button {
+  padding: 5px 10px;
+  margin: 2px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #0056b3;
 }
 
 input,
 select {
-  padding: 6px 10px;
-  margin: 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  width: 100%;
+  padding: 5px;
+  box-sizing: border-box;
 }
 
-button {
-  background-color: #2f4fc1;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 5px;
-  cursor: pointer;
+.transaction-controls {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+  justify-content: space-between;
+  border-top: 2px solid #ddd;
+  padding-top: 15px;
 }
 
-button:hover {
-  background-color: #1d3ba0;
+.download-btn {
+  background-color: #28a745;
 }
 
-.download-button {
-  background-color: teal;
+.download-btn:hover {
+  background-color: #218838;
+}
+
+.date-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.date-filter label {
   font-weight: bold;
-  font-size: 16px;
-  padding: 10px 16px;
-  display: block;
-  margin: 20px auto;
-  border-radius: 8px;
-}
-
-.download-button:hover {
-  background-color: #008080;
 }
