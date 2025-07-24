@@ -54,7 +54,7 @@ moneymesh/
 
 │   ├── assets/
 
-│   │   └── moneymesh-logo.png    # Logo image for the navbar
+│   │   └── moneymesh-logo.png      # Logo image for the navbar
 
 │   ├── Components/
 
