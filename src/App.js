@@ -1,10 +1,9 @@
 import React, { useState, createContext, useContext } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import './App.css';
-import Landing from './Components/LandingPage';
-import Overview from './Components/Overview';
-import Transaction from './Components/Transaction';
-
+import Landing from './components/LandingPage';
+import Overview from './components/Overview';
+import Transaction from './components/Transaction';
 
 // Context setup
 const FinancialContext = createContext();
