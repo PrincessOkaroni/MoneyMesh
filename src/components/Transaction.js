@@ -1,5 +1,6 @@
-import React, { useState, useContext } from "react";
 import "./Transaction.css";
+import React, { useState } from "react";
+
 import { useFinancial } from "../App"; // Adjust if needed
 
 const Transaction = () => {
