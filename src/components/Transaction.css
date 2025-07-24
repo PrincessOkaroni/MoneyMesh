@@ -1,91 +1,84 @@
-.transaction-container {
+/* Container for side-by-side layout */
+.transaction-section {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
   padding: 20px;
+}
+
+/* Table styling */
+table {
+  min-width: 500px;
+  border-collapse: collapse;
   font-family: Arial, sans-serif;
 }
 
-.transaction-sections {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 20px;
+th, td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
 }
 
-.transaction-table,
-.transaction-form {
-  flex: 1;
-  min-width: 400px;
+th {
+  background-color: #1133aa;
+  color: white;
 }
 
-.transaction-table table,
-.transaction-form table {
-  width: 100%;
-  border-collapse: collapse;
+tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-h2 {
-  text-align: center;
-  color: #004d40;
-  margin-bottom: 10px;
-}
-
-table thead {
-  background-color: #1e40af;
-  color: white;
-}
-
-table th,
-table td {
-  padding: 10px;
+/* Transaction form */
+.form-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 300px;
+  padding: 16px;
   border: 1px solid #ddd;
-  text-align: left;
+  border-radius: 8px;
+  background-color: #fdfdfd;
 }
 
-tfoot td {
-  background-color: #eef;
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
   font-weight: bold;
+  margin-bottom: 4px;
 }
 
+input, select {
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* Buttons */
 button {
-  padding: 6px 10px;
-  margin: 2px;
-  border: none;
-  border-radius: 5px;
-  background-color: #1976d2;
+  background-color: #007bff;
   color: white;
+  border: none;
   cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  margin-top: 6px;
+  transition: background-color 0.3s;
 }
 
 button:hover {
-  background-color: #0d47a1;
+  background-color: #0056b3;
 }
 
-.download-button {
+/* Headings */
+h2 {
   margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #00897b;
-  color: white;
-  font-weight: bold;
-  border-radius: 8px;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.download-button:hover {
-  background-color: #00695c;
-}
-
-.date-filter {
+  font-size: 1.5rem;
   text-align: center;
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-.date-filter input[type="date"] {
-  padding: 6px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  margin: 5px;
-  font-size: 14px;
+  color: teal;
 }
