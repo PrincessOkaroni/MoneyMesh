@@ -7,6 +7,13 @@ import { useFinancial } from '../App';
 import logo from '../assets/moneymesh-logo.png';
 import './BudgetPlanning.css';
 
+// Moved outside to fix ESLint warning
+const calculateSpent = (transactions, category) => {
+  return transactions
+    .filter(t => t.category === category && t.type === 'Expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+};
+
 const BudgetPlanning = () => {
   const { transactions, budgets, setBudgets } = useFinancial();
   const [modal, setModal] = useState(null);
@@ -17,7 +24,7 @@ const BudgetPlanning = () => {
 
   useEffect(() => {
     budgets.forEach(budget => {
-      const spent = calculateSpent(budget.category);
+      const spent = calculateSpent(transactions, budget.category);
       const percentage = (spent / budget.limit) * 100;
       if (percentage >= 80 && percentage < 100) {
         toast.warn(`${budget.category} budget is almost exhausted (${percentage.toFixed(1)}%)!`, { toastId: budget.id });
@@ -27,12 +34,6 @@ const BudgetPlanning = () => {
     });
   }, [budgets, transactions]);
 
-  const calculateSpent = (category) => {
-    return transactions
-      .filter(t => t.category === category && t.type === 'Expense')
-      .reduce((sum, t) => sum + t.amount, 0);
-  };
-
   const handleAddEditBudget = async (e) => {
     e.preventDefault();
     const { category, limit, duration } = formData;
@@ -40,9 +41,7 @@ const BudgetPlanning = () => {
       toast.error('Please fill in all fields with valid data');
       return;
     }
-
     const newBudget = { category, limit: parseFloat(limit), duration };
-
     try {
       if (editId) {
         await axios.put(`http://localhost:3001/budgets/${editId}`, { ...newBudget, id: editId });
@@ -93,7 +92,7 @@ const BudgetPlanning = () => {
           <NavLink to="/transactions" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
             Transactions
           </NavLink>
-          <NavLink to="/budget-planning" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+          <NavLink to="/BudgetPlanning" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
             Budget Planning
           </NavLink>
         </div>
@@ -125,7 +124,7 @@ const BudgetPlanning = () => {
           </thead>
           <tbody>
             {budgets.map(budget => {
-              const spent = calculateSpent(budget.category);
+              const spent = calculateSpent(transactions, budget.category);
               const remaining = budget.limit - spent;
               const percentage = Math.min((spent / budget.limit) * 100, 100);
               return (
@@ -137,7 +136,13 @@ const BudgetPlanning = () => {
                   <td>
                     <div className="progress-bar-container">
                       <div
-                        className={`progress-bar ${percentage >= 100 ? 'over-budget' : percentage >= 80 ? 'near-budget' : ''}`}
+                        className={`progress-bar ${
+                          percentage >= 100
+                            ? 'over-budget'
+                            : percentage >= 80
+                            ? 'near-budget'
+                            : ''
+                        }`}
                         style={{ width: `${percentage}%` }}
                         title={`${percentage.toFixed(1)}% used`}
                       ></div>
