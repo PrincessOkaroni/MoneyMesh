@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "./Transaction.css";
+import { NavLink } from 'react-router-dom';
+import logo from '../assets/moneymesh-logo.png';
+
+
+
+
 
 const Transaction = () => {
   const [transactions, setTransactions] = useState([]);
@@ -85,9 +91,38 @@ const Transaction = () => {
     link.click();
     document.body.removeChild(link);
   };
+  
 
   return (
     <div className="transaction-container">
+      <nav className="navbar">
+        <div className="logo-container">
+          <img src={logo} alt="MoneyMesh Logo" className="logo" />
+          <span className="brand">MoneyMesh</span>
+        </div>
+        <div className="nav-tabs">
+          <NavLink to="/overview" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+            Overview
+          </NavLink>
+          <NavLink to="/transactions" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+            Transactions
+          </NavLink>
+          <NavLink to="/budget-planning" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+            Budget Planning
+          </NavLink>
+        </div>
+        <div className="profile-section">
+          <img
+            src="https://i.pravatar.cc/40"
+            alt="User"
+            className="profile-pic"
+          />
+          <div className="profile-info">
+            <span className="welcome">Welcome</span>
+            <span className="username">Purity</span>
+          </div>
+        </div>
+      </nav>
       <div className="transaction-section">
         <div className="transaction-table">
           <h2 className="section-title">Transaction List</h2>
