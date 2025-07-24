@@ -3,7 +3,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import './App.css';
 import Landing from './components/LandingPage';
 import Overview from './components/Overview';
-import Transaction from './components/Transaction';
+import Transaction from 'src/components/Transaction.js';
 
 // Context setup
 const FinancialContext = createContext();
