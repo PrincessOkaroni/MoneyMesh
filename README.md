@@ -26,6 +26,7 @@ MoneyMesh is a personal finance management web application built with React, des
 - State Management: React Context API
 
 ## Project Structure
+
 moneymesh/
 ├── src/
 │   ├── App.jsx                   # Main app component with routing and context
@@ -48,7 +49,7 @@ moneymesh/
 ├── db.json                       # Mock backend data for financialData and transactions
 ├── package.json                  # Project dependencies and scripts
 ├── README.md                     # Project documentation
-├── .eslintrc.json                # ESLint configuration
+├── .eslintrc.json                # ESLinconfiguration     
 
 ## Setup Instructions
 
