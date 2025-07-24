@@ -1,206 +1,170 @@
-import React, { useState } from "react";
-import "./Transaction.css";
-import { useFinancial } from "../App"; // Adjust if needed
+import React, { useState } from 'react';
+import './Transaction.css';
 
 const Transaction = () => {
-  const { transactions, setTransactions } = useFinancial();
-
+  const [transactions, setTransactions] = useState([]);
   const [formData, setFormData] = useState({
-    type: "Expense",
-    date: "",
-    category: "",
-    description: "",
-    amount: "",
+    type: 'Expense',
+    date: '',
+    category: '',
+    description: '',
+    amount: ''
   });
 
-  const [filterStartDate, setFilterStartDate] = useState("");
-  const [filterEndDate, setFilterEndDate] = useState("");
+  const [editIndex, setEditIndex] = useState(null);
+  const [filter, setFilter] = useState({ start: '', end: '' });
 
-  // Handle form changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Add transaction
   const handleAdd = () => {
-    if (!formData.date || !formData.amount) return;
+    if (!formData.date || !formData.category || !formData.description || !formData.amount) {
+      alert("Please fill in all fields.");
+      return;
+    }
 
     const newTransaction = {
       ...formData,
-      amount: parseFloat(formData.amount),
+      amount: parseFloat(formData.amount)
     };
 
-    setTransactions((prev) => [...prev, newTransaction]);
+    if (editIndex !== null) {
+      const updated = [...transactions];
+      updated[editIndex] = newTransaction;
+      setTransactions(updated);
+      setEditIndex(null);
+    } else {
+      setTransactions([...transactions, newTransaction]);
+    }
 
-    setFormData({
-      type: "Expense",
-      date: "",
-      category: "",
-      description: "",
-      amount: "",
-    });
+    setFormData({ type: 'Expense', date: '', category: '', description: '', amount: '' });
   };
 
-  // Edit transaction
   const handleEdit = (index) => {
-    const transaction = transactions[index];
-    setFormData(transaction);
-    handleDelete(index);
+    setFormData(transactions[index]);
+    setEditIndex(index);
   };
 
-  // Delete transaction
   const handleDelete = (index) => {
-    const updated = [...transactions];
-    updated.splice(index, 1);
+    const updated = transactions.filter((_, i) => i !== index);
     setTransactions(updated);
   };
 
-  // Filter by date
-  const filteredTransactions = transactions.filter((transaction) => {
-    const transactionDate = new Date(transaction.date);
-    const start = filterStartDate ? new Date(filterStartDate) : null;
-    const end = filterEndDate ? new Date(filterEndDate) : null;
-
-    return (
-      (!start || transactionDate >= start) &&
-      (!end || transactionDate <= end)
-    );
-  });
-
-  // Calculate totals
-  const totalIncome = filteredTransactions
-    .filter((t) => t.type === "Income")
-    .reduce((acc, t) => acc + Number(t.amount), 0);
-
-  const totalExpense = filteredTransactions
-    .filter((t) => t.type === "Expense")
-    .reduce((acc, t) => acc + Number(t.amount), 0);
-
-  const balance = totalIncome - totalExpense;
-
-  // Export CSV
-  const handleDownloadCSV = () => {
-    const csvContent = [
-      ["Type", "Date", "Category", "Description", "Amount"],
+  const handleDownload = () => {
+    const csv = [
+      ['Type', 'Date', 'Category', 'Description', 'Amount'],
       ...transactions.map((t) => [
         t.type,
         t.date,
         t.category,
         t.description,
-        Number(t.amount).toFixed(2),
-      ]),
+        t.amount
+      ])
     ]
-      .map((row) => row.join(","))
-      .join("\n");
+      .map((row) => row.join(','))
+      .join('\n');
 
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const link = document.createElement("a");
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = "transactions.csv";
+    link.download = 'transactions.csv';
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
   };
 
-  return (
-    <div className="transaction-container">
-      <div className="transaction-columns">
-        <div className="transaction-list">
-          <h2>Transaction List</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTransactions.map((transaction, index) => (
-                <tr key={index}>
-                  <td>{transaction.type}</td>
-                  <td>{transaction.date}</td>
-                  <td>{transaction.category}</td>
-                  <td>{transaction.description}</td>
-                  <td>${Number(transaction.amount).toFixed(2)}</td>
-                  <td>
-                    <button onClick={() => handleEdit(index)}>Edit</button>
-                    <button onClick={() => handleDelete(index)}>Delete</button>
-                  </td>
-                </tr>
-              ))}
-              <tr className="total-row">
-                <td colSpan="4"><strong>Total</strong></td>
-                <td colSpan="2"><strong>${(totalIncome + totalExpense).toFixed(2)}</strong></td>
-              </tr>
-              <tr className="balance-row">
-                <td colSpan="4"><strong>Remaining Balance</strong></td>
-                <td colSpan="2"><strong>${balance.toFixed(2)}</strong></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+  const filteredTransactions = transactions.filter((t) => {
+    const tDate = new Date(t.date);
+    const start = filter.start ? new Date(filter.start) : null;
+    const end = filter.end ? new Date(filter.end) : null;
+    return (!start || tDate >= start) && (!end || tDate <= end);
+  });
 
-        <div className="transaction-form">
-          <h2>Transaction Form</h2>
-          <form>
-            <select name="type" value={formData.type} onChange={handleChange}>
-              <option value="Expense">Expense</option>
-              <option value="Income">Income</option>
-            </select>
-            <input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="category"
-              placeholder="Category"
-              value={formData.category}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="description"
-              placeholder="Description"
-              value={formData.description}
-              onChange={handleChange}
-            />
-            <input
-              type="number"
-              name="amount"
-              placeholder="Amount"
-              value={formData.amount}
-              onChange={handleChange}
-            />
-            <button type="button" onClick={handleAdd}>Add</button>
-          </form>
+  const total = filteredTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+  const remaining = filteredTransactions.reduce(
+    (sum, t) => t.type === 'Income' ? sum + Number(t.amount) : sum - Number(t.amount),
+    0
+  );
+
+  return (
+    <div>
+      <h2 style={{ textAlign: 'center', color: 'teal' }}>Transaction List</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredTransactions.map((transaction, index) => (
+            <tr key={index}>
+              <td>{transaction.type}</td>
+              <td>{new Date(transaction.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+              <td>{transaction.category}</td>
+              <td>{transaction.description}</td>
+              <td>${Number(transaction.amount).toFixed(2)}</td>
+              <td>
+                <button onClick={() => handleEdit(index)}>Edit</button>
+                <button onClick={() => handleDelete(index)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+          <tr>
+            <td colSpan="4"><strong>Total</strong></td>
+            <td><strong>${total.toFixed(2)}</strong></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td colSpan="4"><strong>Remaining Balance</strong></td>
+            <td><strong>${remaining.toFixed(2)}</strong></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 style={{ textAlign: 'center', color: 'teal' }}>Transaction Form</h2>
+      <form className="form-layout" onSubmit={(e) => e.preventDefault()}>
+        <div className="form-group">
+          <label>Type</label>
+          <select name="type" value={formData.type} onChange={handleChange}>
+            <option value="Expense">Expense</option>
+            <option value="Income">Income</option>
+          </select>
         </div>
+        <div className="form-group">
+          <label>Date</label>
+          <input type="date" name="date" value={formData.date} onChange={handleChange} />
+        </div>
+        <div className="form-group">
+          <label>Category</label>
+          <input type="text" name="category" placeholder="Category" value={formData.category} onChange={handleChange} />
+        </div>
+        <div className="form-group">
+          <label>Description</label>
+          <input type="text" name="description" placeholder="Description" value={formData.description} onChange={handleChange} />
+        </div>
+        <div className="form-group">
+          <label>Amount</label>
+          <input type="number" name="amount" placeholder="Amount" value={formData.amount} onChange={handleChange} />
+        </div>
+        <button type="button" onClick={handleAdd}>Add</button>
+      </form>
+
+      <div style={{ textAlign: 'center', marginTop: '10px' }}>
+        <button onClick={handleDownload}>Download CSV</button>
       </div>
 
-      <div className="transaction-download">
-        <button onClick={handleDownloadCSV}>Download CSV</button>
-        <div className="date-filter">
-          <label>From: </label>
-          <input
-            type="date"
-            value={filterStartDate}
-            onChange={(e) => setFilterStartDate(e.target.value)}
-          />
-          <label>To: </label>
-          <input
-            type="date"
-            value={filterEndDate}
-            onChange={(e) => setFilterEndDate(e.target.value)}
-          />
-        </div>
+      <div style={{ textAlign: 'center', marginTop: '10px' }}>
+        <label>From: </label>
+        <input type="date" value={filter.start} onChange={(e) => setFilter({ ...filter, start: e.target.value })} />
+        <label style={{ marginLeft: '10px' }}>To: </label>
+        <input type="date" value={filter.end} onChange={(e) => setFilter({ ...filter, end: e.target.value })} />
       </div>
     </div>
   );
