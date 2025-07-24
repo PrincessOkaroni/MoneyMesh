@@ -49,7 +49,7 @@ moneymesh/
 ├── db.json                       # Mock backend data for financialData and transactions
 ├── package.json                  # Project dependencies and scripts
 ├── README.md                     # Project documentation
-├── .eslintrc.json                # ESLinconfiguration     
+├── .eslintrc.json                # ESLint configuration   
 
 ## Setup Instructions
 
