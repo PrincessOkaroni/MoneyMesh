@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import "./Transaction.css"; 
 const Transaction = () => {
   const [transactions, setTransactions] = useState([]);
   const [formData, setFormData] = useState({
