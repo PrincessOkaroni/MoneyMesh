@@ -1,70 +1,107 @@
-# Getting Started with Create React App
+## MoneyMesh
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Description
+MoneyMesh is a personal finance management web application built with React, designed to help users track their income, expenses, and savings. The application provides a user-friendly interface to visualize financial data through cards, a transaction table, and a pie chart for expense statistics. It features a responsive navbar with navigation tabs, a welcome message, and a profile image, ensuring an intuitive user experience. Users can add transactions (income, expenses, savings), filter transactions by time period, and view a breakdown of their expenses by category.
 
-## Available Scripts
 
-In the project directory, you can run:
+## Features
+- Landing Page: Welcomes users with a call-to-action to navigate to the Overview page.
+- Navbar: Displays the MoneyMesh logo, project name, - - - - navigation tabs (Overview, Transactions, Budget Planning), welcome message ("Welcome, Purity"), and user profile image.
+- Financial Cards: Shows Balance, Total Income, Total Expense, and Total Savings with real-time updates.
+- Action Buttons: Allows users to add Income, Expense, or Savings via a modal form.
+- Filter Dropdown: Filters transactions by "This Month" (Jul 2025), "Last Month" (Jun 2025), or "Select Period" (all transactions).
+- Transaction Table: Displays a table of transactions with columns for Type, Date, Category, Description, and Amount, including a total row.
+- Expense Statistics Pie Chart: Visualizes expense distribution (30% Investment and Savings, 25% Bills, 20% General Upkeep, 10% Entertainment, 15% Others) based on income, with interactive tooltips and click events showing category details.
+- Modal Form: Enables adding new transactions with fields for amount, category, and description.
+- Mock Backend: Uses db.json with JSON Server to simulate a REST API for financial data and transactions.
+- Responsive Design: Optimized for both desktop and mobile devices, with a collapsible navbar on smaller screens.
+- Error Handling: Includes an error boundary to handle runtime errors gracefully and a 404 page for invalid routes.
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Frontend: React, React Router, Chart.js, React-Chartjs-2
+- Styling: Custom CSS (no Tailwind CSS)
+- Backend: JSON Server (mock API)
+- Build Tool: Create React App
+- State Management: React Context API
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Project Structure
+moneymesh/
+├── src/
+│   ├── App.jsx                   # Main app component with routing and context
+│   ├── App.css                   # Styles for the app container and error pages
+│   ├── assets/
+│   │   └── moneymesh-logo.png    # Logo image for the navbar
+│   ├── Components/
+│   │   ├── Overview.jsx          # Overview page with navbar, cards, buttons, table, and pie chart
+│   │   ├── Overview.css          # Styles for Overview.jsx
+│   │   ├── Transaction.jsx       # Transactions page with navbar, buttons, and table
+│   │   ├── Transaction.css       # Styles for Transaction.jsx
+│   │   ├── BudgetPlanning.jsx    # Budget Planning page (placeholder) with navbar
+│   │   ├── BudgetPlanning.css    # Styles for BudgetPlanning.jsx
+│   │   ├── LandingPage.jsx       # Landing page with navbar and welcome message
+│   │   ├── LandingPage.css       # Styles for LandingPage.jsx
+├── public/
+│   ├── index.html                # HTML entry point
+│   ├── favicon.ico               # Favicon
+│   ├── manifest.json             # Web app manifest
+├── db.json                       # Mock backend data for financialData and transactions
+├── package.json                  # Project dependencies and scripts
+├── README.md                     # Project documentation
+├── .eslintrc.json                # ESLint configuration
 
-### `npm test`
+## Setup Instructions
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Clone the Repository:
+git clone `git@github.com:PrincessOkaroni/MoneyMesh.git`
+cd moneymesh
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Install Dependencies:Ensure Node.js is installed, then run:
+`npm install`
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+This installs required packages: react, react-dom, react-router-dom, chart.js, react-chartjs-2.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
+Run the Application:Start the development server:
+`npm start`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Install JSON Server for the mock backend:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+`npm install -g json-server`
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Start JSON Server to serve the mock API:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+`json-server --watch db.json --port 3001`
 
-## Learn More
+- Open http://localhost:3000 in your browser. The app redirects to /landingPage by default.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Build for Production:Create a production build:
+`npm run build`
 
-To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Code Splitting
+- Linting:Check for linting issues:
+`npm run lint`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- Fix auto-fixable issues:
+`npm run lint -- --fix`
 
-### Analyzing the Bundle Size
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Technologies Used
 
-### Making a Progressive Web App
+- React: JavaScript library for building user interfaces.
+- React Router: Handles client-side routing for navigation between pages.
+- Chart.js & React-Chartjs-2: Renders the interactive pie chart for expense statistics.
+- React Context API: Manages shared state for financial data and transactions.
+- CSS: Custom styles for responsive design and component styling.
+- Create React App: Bootstraps the project with a pre-configured build setup.
+- ESLint: Enforces code quality and consistency.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Authors
 
-### Advanced Configuration
+Okaroni Purity - Team Lead
+Justin Tutu    - Contributor
+Paul Ondiek    - Contributor
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## License
+This project is licensed under the MIT License.
