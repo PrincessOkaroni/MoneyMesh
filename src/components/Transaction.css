@@ -3,18 +3,33 @@
   font-family: sans-serif;
 }
 
-h2 {
-  color: #222;
-  margin-bottom: 10px;
+.transaction-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.transaction-sections {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.transaction-table,
+.transaction-form {
+  flex: 1;
+  min-width: 350px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
   background-color: #f8faff;
   border-radius: 10px;
   overflow: hidden;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
 }
 
 th {
@@ -67,4 +82,10 @@ button:hover {
 
 .download-button:hover {
   background-color: #008080;
+}
+
+.date-filter {
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
 }
