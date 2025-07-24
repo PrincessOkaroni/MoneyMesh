@@ -4,7 +4,6 @@ import './App.css';
 import Landing from './components/LandingPage';
 import Overview from './components/Overview';
 import Transaction from './components/Transaction';
-import Budget from './components/BudgetPlanning';
 
 // Context setup
 const FinancialContext = createContext();
@@ -30,7 +29,6 @@ function App() {
           <Landing />
           <Overview />
           <Transaction />
-          <Budget />
         </div>
       </Router>
     </FinancialContext.Provider>
