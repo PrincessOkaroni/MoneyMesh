@@ -1,91 +1,91 @@
 .transaction-container {
-  padding: 30px;
-  font-family: sans-serif;
-}
-
-.transaction-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  padding: 20px;
+  font-family: Arial, sans-serif;
 }
 
 .transaction-sections {
   display: flex;
-  gap: 20px;
   justify-content: space-between;
   flex-wrap: wrap;
+  gap: 20px;
 }
 
 .transaction-table,
 .transaction-form {
   flex: 1;
-  min-width: 350px;
+  min-width: 400px;
 }
 
-table {
+.transaction-table table,
+.transaction-form table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #f8faff;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  background-color: #f9f9f9;
 }
 
-th {
-  background-color: #2f4fc1;
+h2 {
+  text-align: center;
+  color: #004d40;
+  margin-bottom: 10px;
+}
+
+table thead {
+  background-color: #1e40af;
   color: white;
-  padding: 12px;
+}
+
+table th,
+table td {
+  padding: 10px;
+  border: 1px solid #ddd;
   text-align: left;
 }
 
-td {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-}
-
 tfoot td {
-  font-weight: bold;
   background-color: #eef;
-}
-
-input,
-select {
-  padding: 6px 10px;
-  margin: 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  font-weight: bold;
 }
 
 button {
-  background-color: #2f4fc1;
-  color: white;
+  padding: 6px 10px;
+  margin: 2px;
   border: none;
-  padding: 6px 12px;
   border-radius: 5px;
+  background-color: #1976d2;
+  color: white;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #1d3ba0;
+  background-color: #0d47a1;
 }
 
 .download-button {
-  background-color: teal;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #00897b;
+  color: white;
   font-weight: bold;
-  font-size: 16px;
-  padding: 10px 16px;
-  display: block;
-  margin: 20px auto;
   border-radius: 8px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .download-button:hover {
-  background-color: #008080;
+  background-color: #00695c;
 }
 
 .date-filter {
   text-align: center;
   margin-top: 10px;
   font-weight: bold;
+}
+
+.date-filter input[type="date"] {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin: 5px;
+  font-size: 14px;
 }
