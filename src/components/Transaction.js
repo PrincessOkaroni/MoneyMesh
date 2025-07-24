@@ -11,6 +11,9 @@ const Transaction = () => {
     amount: "",
   });
 
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,10 +52,18 @@ const Transaction = () => {
     setTransactions((prev) => prev.filter((item) => item.id !== t.id));
   };
 
-  // Download CSV
+  // Filter transactions by date
+  const filteredTransactions = transactions.filter((t) => {
+    const tDate = new Date(t.date);
+    const from = startDate ? new Date(startDate) : null;
+    const to = endDate ? new Date(endDate) : null;
+    return (!from || tDate >= from) && (!to || tDate <= to);
+  });
+
+  // Download filtered CSV
   const handleDownload = () => {
     const headers = "Type,Date,Category,Description,Amount\n";
-    const rows = transactions
+    const rows = filteredTransactions
       .map((t) =>
         [t.type, t.date, t.category, t.description, t.amount].join(",")
       )
@@ -69,10 +80,16 @@ const Transaction = () => {
     URL.revokeObjectURL(url);
   };
 
-  const totalAmount = transactions.reduce(
-    (sum, t) => sum + parseFloat(t.amount || 0),
-    0
-  );
+  // Totals
+  const totalIncome = filteredTransactions
+    .filter((t) => t.type === "Income")
+    .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+
+  const totalExpense = filteredTransactions
+    .filter((t) => t.type === "Expense")
+    .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+
+  const remainingBalance = totalIncome - totalExpense;
 
   return (
     <div className="transaction-container">
@@ -92,7 +109,7 @@ const Transaction = () => {
               </tr>
             </thead>
             <tbody>
-              {transactions.map((t) => (
+              {filteredTransactions.map((t) => (
                 <tr key={t.id}>
                   <td>{t.type}</td>
                   <td>{t.date}</td>
@@ -108,8 +125,16 @@ const Transaction = () => {
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan="4"><strong>Total</strong></td>
-                <td colSpan="2"><strong>${totalAmount.toFixed(2)}</strong></td>
+                <td colSpan="4"><strong>Total Income</strong></td>
+                <td colSpan="2"><strong>${totalIncome.toFixed(2)}</strong></td>
+              </tr>
+              <tr>
+                <td colSpan="4"><strong>Total Expense</strong></td>
+                <td colSpan="2"><strong>${totalExpense.toFixed(2)}</strong></td>
+              </tr>
+              <tr>
+                <td colSpan="4"><strong>Remaining Balance</strong></td>
+                <td colSpan="2"><strong>${remainingBalance.toFixed(2)}</strong></td>
               </tr>
             </tfoot>
           </table>
@@ -190,9 +215,24 @@ const Transaction = () => {
         Download CSV
       </button>
 
-      {/* Placeholder for date filter */}
-      <div className="date-filter">
-        from [ picked-date ] - To [ picked-date ]
+      {/* Date Filter UI */}
+      <div className="date-filter" style={{ marginTop: "10px" }}>
+        <label>
+          From:{" "}
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </label>
+        <label style={{ marginLeft: "10px" }}>
+          To:{" "}
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </label>
       </div>
     </div>
   );
