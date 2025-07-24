@@ -1,0 +1,70 @@
+.transaction-container {
+  padding: 30px;
+  font-family: sans-serif;
+}
+
+h2 {
+  color: #222;
+  margin-bottom: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  background-color: #f8faff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+th {
+  background-color: #2f4fc1;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+tfoot td {
+  font-weight: bold;
+  background-color: #eef;
+}
+
+input,
+select {
+  padding: 6px 10px;
+  margin: 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #2f4fc1;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1d3ba0;
+}
+
+.download-button {
+  background-color: teal;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 10px 16px;
+  display: block;
+  margin: 20px auto;
+  border-radius: 8px;
+}
+
+.download-button:hover {
+  background-color: #008080;
+}

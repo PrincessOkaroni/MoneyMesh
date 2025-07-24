@@ -1,0 +1,28 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "fullName": "Jane Doe",
+      "email": "jane@example.com",
+      "password": "password123"
+    },
+    {
+      "id": "2",
+      "fullName": "John Smith",
+      "email": "john@example.com",
+      "password": "mypassword"
+    },
+    {
+      "id": "63e1",
+      "fullName": "Pury tuuu",
+      "email": "purity@gmail.com",
+      "password": "567567567"
+    },
+    {
+      "id": "dd05",
+      "fullName": "qwertgy rtyu",
+      "email": "wereto@gmail.com",
+      "password": "weretoo"
+    }
+  ]
+}

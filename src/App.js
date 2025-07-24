@@ -1,5 +1,5 @@
 import React, { useState, createContext, useContext } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Landing from './components/LandingPage';
 import Overview from './components/Overview';
@@ -24,14 +24,15 @@ function App() {
 
   return (
     <FinancialContext.Provider value={{ financialData, setFinancialData, transactions, setTransactions }}>
-      <Router>
-        <div className="App">
-          <Landing />
-          <Overview />
-          <Transaction />
-        </div>
-      </Router>
-    </FinancialContext.Provider>
+  <Router>
+    <Routes>
+      <Route path="/" element={<Landing/>} />
+      <Route path="/dashboard" element={<Overview />} />
+      <Route path="/transactions" element={<Transaction/>} />
+    </Routes>
+  </Router>
+</FinancialContext.Provider>
+
   );
 }
 
