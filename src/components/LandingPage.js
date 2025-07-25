@@ -4,8 +4,6 @@ import logo from '../assets/moneymesh-logo.png';
 import { useNavigate } from 'react-router-dom';
 import heroLogo from '../assets/herologo.png';
 
-
-
 function LandingPage() {
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
@@ -45,7 +43,6 @@ function LandingPage() {
       {showSignIn && <SignInForm />}
       {showSignUp && <SignUpForm setShowSignIn={setShowSignIn} setShowSignUp={setShowSignUp} />}
 
-      {/* ... other sections ... */}
       {/* FEATURES */}
       <section id="features" className="features">
         <p className="section-label">FEATURES</p>
@@ -138,8 +135,6 @@ function LandingPage() {
 function SignInForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  // ✅ useNavigate hook to redirect
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
@@ -150,10 +145,11 @@ function SignInForm() {
       .then(res => res.json())
       .then(users => {
         const user = users.find(u => u.email === email && u.password === password);
-
         if (user) {
+          // Store firstName in localStorage
+          localStorage.setItem('user', JSON.stringify({ firstName: user.firstName }));
           alert('Sign in successful! Redirecting to dashboard...');
-          navigate('/overview');   // Change to '/dashboard' or your route
+          navigate('/overview');
         } else {
           alert('Invalid email or password. Please try again.');
         }
@@ -192,11 +188,15 @@ function SignUpForm({ setShowSignIn, setShowSignUp }) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const newUser = { fullName, email, password };
+    // Extract firstName from fullName (first word)
+    const firstName = fullName.trim().split(' ')[0];
+
+    const newUser = { firstName, email, password };
 
     fetch('http://localhost:3001/users', {
       method: 'POST',
@@ -206,12 +206,15 @@ function SignUpForm({ setShowSignIn, setShowSignUp }) {
       .then(res => res.json())
       .then(data => {
         console.log('Account created:', data);
-        alert('Account created! Please sign in.');
-        setShowSignIn(true);
+        // Store firstName in localStorage
+        localStorage.setItem('user', JSON.stringify({ firstName }));
+        alert('Account created! Redirecting to dashboard...');
         setShowSignUp(false);
+        navigate('/overview');
       })
       .catch(err => {
         console.error('Error creating account:', err);
+        alert('Error creating account. Please try again.');
       });
   };
 

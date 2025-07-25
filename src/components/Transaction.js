@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import "./Transaction.css";
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import logo from '../assets/moneymesh-logo.png';
+import { useFinancial } from '../App';
 
 const apiUrl = "http://localhost:3001/transactions";
 const categories = ["Bills", "Entertainment", "Investment and Savings", "General Upkeep", "Others"];
 
 const Transaction = () => {
-  const [transactions, setTransactions] = useState([]);
+  // eslint-disable-next-line no-unused-vars
+  const { transactions, setTransactions, financialData, setFinancialData } = useFinancial();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     type: "Income",
     date: "",
@@ -20,20 +23,39 @@ const Transaction = () => {
   const [filterEndDate, setFilterEndDate] = useState("");
   const [message, setMessage] = useState("");
 
+
   const user = { firstName: "Purity" };
 
+  // Get user from localStorage
+  const user = JSON.parse(localStorage.getItem('user')) 
+
+  // Redirect to login if no user is found
   useEffect(() => {
+
     fetch(apiUrl)
       .then(res => res.json())
       .then(data => setTransactions(data))
       .catch(err => console.error("Error fetching:", err));
   }, []);
 
+
+    if (!user.firstName) {
+      navigate('/login');
+    }
+  }, [user.firstName, navigate]);
+
+  useEffect(() => {
+    // Sync transactions with localStorage for persistence
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+  }, [transactions]);
+
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleAddTransaction = () => {
+
     if (!formData.date || !formData.category || !formData.amount) {
       alert("Please fill all fields");
       return;
@@ -89,6 +111,102 @@ const Transaction = () => {
         setMessage("Transaction deleted!");
         setTimeout(() => setMessage(""), 2000);
       });
+
+    if (!formData.date || !formData.category || !formData.description || !formData.amount || isNaN(formData.amount) || formData.amount <= 0) {
+      alert('Please fill in all fields with valid data');
+      return;
+    }
+
+    const amount = parseFloat(formData.amount);
+    const newTransaction = {
+      ...formData,
+      amount,
+      id: editingIndex !== null ? transactions[editingIndex].id : transactions.length + 1,
+    };
+
+    if (editingIndex !== null) {
+      const oldTransaction = transactions[editingIndex];
+      const oldAmount = parseFloat(oldTransaction.amount);
+      const updated = [...transactions];
+      updated[editingIndex] = newTransaction;
+
+      setFinancialData((prev) => {
+        const typeKey = newTransaction.type.toLowerCase();
+        const oldTypeKey = oldTransaction.type.toLowerCase();
+        const newFinancialData = { ...prev };
+
+        // Revert old transaction effect
+        if (oldTypeKey === 'income') {
+          newFinancialData.income -= oldAmount;
+          newFinancialData.balance -= oldAmount;
+        } else if (oldTypeKey === 'expense') {
+          newFinancialData.expense -= oldAmount;
+          newFinancialData.balance += oldAmount;
+        } else if (oldTypeKey === 'savings') {
+          newFinancialData.savings -= oldAmount;
+          newFinancialData.balance += oldAmount;
+        }
+
+        // Apply new transaction effect
+        if (typeKey === 'income') {
+          newFinancialData.income += amount;
+          newFinancialData.balance += amount;
+        } else if (typeKey === 'expense') {
+          newFinancialData.expense += amount;
+          newFinancialData.balance -= amount;
+        } else if (typeKey === 'savings') {
+          newFinancialData.savings += amount;
+          newFinancialData.balance -= amount;
+        }
+
+        return newFinancialData;
+      });
+
+      setTransactions(updated);
+      setEditingIndex(null);
+    } else {
+      setTransactions([...transactions, newTransaction]);
+      setFinancialData((prev) => {
+        const typeKey = newTransaction.type.toLowerCase();
+        return {
+          ...prev,
+          [typeKey]: prev[typeKey] + amount,
+          balance: typeKey === 'income' ? prev.balance + amount : prev.balance - amount,
+        };
+      });
+    }
+
+    setFormData({
+      type: "Income",
+      date: "",
+      category: "",
+      description: "",
+      amount: "",
+    });
+  };
+
+  const handleEdit = (index) => {
+    setFormData({
+      ...transactions[index],
+      amount: transactions[index].amount.toString(),
+    });
+    setEditingIndex(index);
+  };
+
+  const handleDelete = (index) => {
+    const transaction = transactions[index];
+    const amount = parseFloat(transaction.amount);
+    const typeKey = transaction.type.toLowerCase();
+
+    setFinancialData((prev) => ({
+      ...prev,
+      [typeKey]: prev[typeKey] - amount,
+      balance: typeKey === 'income' ? prev.balance - amount : prev.balance + amount,
+    }));
+
+    const updated = transactions.filter((_, i) => i !== index);
+    setTransactions(updated);
+
   };
 
   const handleClearForm = () => {
@@ -132,15 +250,34 @@ const Transaction = () => {
           <span className="brand">MoneyMesh</span>
         </div>
         <div className="nav-tabs">
+
           <NavLink to="/overview">Overview</NavLink>
           <NavLink to="/transactions">Transactions</NavLink>
           <NavLink to="/budget-planning">Budget Planning</NavLink>
+
+          <NavLink to="/overview" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+            Overview
+          </NavLink>
+          <NavLink to="/transactions" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+            Transactions
+          </NavLink>
+          <NavLink to="/budget-planning" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+            Budget Planning
+          </NavLink>
+          <button onClick={() => { localStorage.removeItem('user'); navigate('/login'); }} className="btn btn-signout">
+            Sign Out
+          </button>
+
         </div>
         <div className="profile-section">
           <img src="https://i.pravatar.cc/40" alt="User" className="profile-pic" />
           <div className="profile-info">
+
             <span className="welcome">Welcome</span>
             <span className="username">{user.firstName}</span>
+
+            <span className="welcome">Welcome, {user?.firstName || 'User'}</span>
+
           </div>
         </div>
       </nav>
@@ -162,8 +299,13 @@ const Transaction = () => {
               </tr>
             </thead>
             <tbody>
+
               {filteredTransactions.map((txn) => (
                 <tr key={txn.id}>
+
+              {filteredTransactions.map((txn, index) => (
+                <tr key={txn.id || index}>
+
                   <td>{txn.type}</td>
                   <td>{new Date(txn.date).toLocaleDateString()}</td>
                   <td>{txn.category}</td>
@@ -202,6 +344,7 @@ const Transaction = () => {
                   <select name="type" value={formData.type} onChange={handleChange}>
                     <option value="Income">Income</option>
                     <option value="Expense">Expense</option>
+                    <option value="Savings">Savings</option>
                   </select>
                 </td>
                 <td><input type="date" name="date" value={formData.date} onChange={handleChange} /></td>

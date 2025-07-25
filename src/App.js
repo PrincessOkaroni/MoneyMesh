@@ -4,13 +4,11 @@ import Landing from './components/LandingPage';
 import Overview from './components/Overview';
 import Transaction from './components/Transaction';
 import BudgetPlanning from './components/BudgetPlanning';
- 
 
 const FinancialContext = createContext();
 export const useFinancial = () => useContext(FinancialContext);
 
 function App() {
-  // ✅ initialize financialData with all needed fields
   const [financialData, setFinancialData] = useState({
     income: 0,
     expense: 0,
@@ -24,6 +22,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Landing />} />
           <Route path="/overview" element={<Overview />} />
           <Route path="/transactions" element={<Transaction />} />
           <Route path="/budget-planning" element={<BudgetPlanning />} />
