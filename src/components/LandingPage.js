@@ -153,7 +153,7 @@ function SignInForm() {
 
         if (user) {
           alert('Sign in successful! Redirecting to dashboard...');
-          navigate('/dashboard');   // Change to '/dashboard' or your route
+          navigate('/overview');   // Change to '/dashboard' or your route
         } else {
           alert('Invalid email or password. Please try again.');
         }
