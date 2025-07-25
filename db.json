@@ -31,11 +31,22 @@
       "password": "2222"
     },
     {
-
       "id": "a28d",
       "firstName": "Justin Tutu",
       "email": "jstntutu3@gmail.com",
       "password": "tutu"
+    },
+    {
+      "id": "9844",
+      "firstName": "Ryan Simiyu",
+      "email": "ryan08@gmail.com",
+      "password": "8822"
+    },
+    {
+      "id": "ee87",
+      "firstName": "James",
+      "email": "james23@gmail.com",
+      "password": "1101"
     }
   ],
   "budgets": [
@@ -61,8 +72,8 @@
       "id": "ee84",
       "category": "Bills",
       "limit": 500,
-      "duration": "Weekly",
       "spent": 450,
+      "duration": "Weekly",
       "creationDate": "2025-07-25T20:51:28.542Z",
       "startDate": "2025-07-25T20:51:28.542Z"
     },
@@ -70,8 +81,8 @@
       "id": "12dd",
       "category": "Others",
       "limit": 6000,
-      "duration": "Monthly",
       "spent": 4500,
+      "duration": "Monthly",
       "creationDate": "2025-07-25T21:01:57.295Z",
       "startDate": "2025-07-25T21:01:57.295Z"
     },
@@ -79,8 +90,8 @@
       "id": "3f19",
       "category": "Entertainment",
       "limit": 600,
-      "duration": "Weekly",
       "spent": 550,
+      "duration": "Weekly",
       "creationDate": "2025-07-25T21:21:57.446Z",
       "startDate": "2025-07-25T21:21:57.446Z"
     }
@@ -101,17 +112,6 @@
       "category": "Entertainment",
       "description": "Movie ticket",
       "amount": 50
-      
-      "id": "9844",
-      "firstName": "Ryan simiyu",
-      "email": "ryan08@gmail.com",
-      "password": "8822"
-    },
-    {
-      "id": "ee87",
-      "firstName": "James",
-      "email": "james23@gmail.com",
-      "password": "1101"
     }
   ]
 }
