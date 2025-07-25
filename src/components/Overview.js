@@ -15,7 +15,7 @@ const Overview = () => {
     setFinancialData,
     transactions,
     setTransactions,
-    user, // <-- Make sure user is provided in your context
+  
   } = useFinancial();
 
   const [modal, setModal] = useState(null); // null, 'income', 'expense', 'savings'

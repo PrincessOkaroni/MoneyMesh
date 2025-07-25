@@ -1,65 +1,153 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import './BudgetPlanning.css';
 import { NavLink } from 'react-router-dom';
 import logo from '../assets/moneymesh-logo.png';
-import './BudgetPlanning.css';
+
 
 const categories = ['Investment and Savings', 'Bills', 'General Upkeep', 'Entertainment', 'Others'];
+const baseURL = 'http://localhost:3001/budgets';
 
 const BudgetPlanning = () => {
   const [budgets, setBudgets] = useState([]);
   const [formData, setFormData] = useState({ category: '', limit: '', duration: '' });
   const [message, setMessage] = useState('');
+  const [editingBudget, setEditingBudget] = useState(null);
 
-  const handleAddBudget = (e) => {
+  useEffect(() => {
+    fetch(baseURL)
+      .then(res => res.json())
+      .then(setBudgets)
+      .catch(console.error);
+  }, []);
+
+  const handleAddOrUpdateBudget = (e) => {
     e.preventDefault();
     if (!formData.category || !formData.limit || !formData.duration) {
       setMessage('Please fill all fields!');
       return;
     }
-    setBudgets([...budgets, { ...formData, limit: parseFloat(formData.limit), id: budgets.length + 1 }]);
-    setMessage('Budget added successfully!');
-    setFormData({ category: '', limit: '', duration: '' });
+
+    if (editingBudget) {
+      // Editing existing budget
+      const updated = { ...editingBudget, ...formData, limit: parseFloat(formData.limit) };
+      fetch(`${baseURL}/${editingBudget.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      })
+        .then(res => res.json())
+        .then(data => {
+          setBudgets(budgets.map(b => b.id === data.id ? data : b));
+          setEditingBudget(null);
+          setFormData({ category: '', limit: '', duration: '' });
+          setMessage('Budget updated successfully!');
+        });
+    } else {
+      // Adding new budget
+      const newBudget = {
+        ...formData,
+        limit: parseFloat(formData.limit),
+        spent: 0,
+        creationDate: new Date().toISOString(),
+        startDate: new Date().toISOString()
+      };
+      fetch(baseURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBudget)
+      })
+        .then(res => res.json())
+        .then(data => {
+          setBudgets([...budgets, data]);
+          setFormData({ category: '', limit: '', duration: '' });
+          setMessage('Budget added successfully!');
+        });
+    }
   };
 
   const handleDelete = (id) => {
-    setBudgets(budgets.filter(b => b.id !== id));
-    setMessage('Budget deleted successfully!');
+    fetch(`${baseURL}/${id}`, { method: 'DELETE' })
+      .then(() => {
+        setBudgets(budgets.filter(b => b.id !== id));
+        setMessage('Budget deleted successfully!');
+      });
+  };
+
+  const handleDeposit = (budget) => {
+    const amount = prompt('Enter amount to deposit:');
+    if (!amount || isNaN(amount)) return;
+    const depositAmount = parseFloat(amount);
+    const updated = { ...budget, spent: budget.spent + depositAmount };
+
+    fetch(`${baseURL}/${budget.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ spent: updated.spent })
+    })
+      .then(res => res.json())
+      .then(data => {
+        setBudgets(budgets.map(b => b.id === data.id ? data : b));
+        setMessage(`Deposited ${depositAmount} successfully!`);
+      });
+  };
+
+const getStatus = (b) => {
+  if (b.spent >= b.limit * 0.9) return 'WARNING';
+  if (b.spent >= b.limit * 0.7) return 'Approaching target';
+  return 'On track';
+};
+
+const getProgressColor = (b) => {
+  if (b.spent >= b.limit * 0.9) return 'red';
+  if (b.spent >= b.limit * 0.7) return 'orange';
+  return 'green';
+};
+  const getDaysRemaining = (b) => {
+    const start = new Date(b.creationDate);
+    let days = 0;
+    if (b.duration === 'Monthly') days = 30;
+    else if (b.duration === 'Weekly') days = 7;
+    else if (b.duration === 'Yearly') days = 365;
+    const end = new Date(start.getTime() + days * 24 * 60 * 60 * 1000);
+    const now = new Date();
+    const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+    return diff > 0 ? diff : 0;
   };
 
   return (
     <div className="budget-planning-container">
       <nav className="navbar">
-        <div className="logo-container">
-          <img src={logo} alt="MoneyMesh Logo" className="logo" />
-          <span className="brand">MoneyMesh</span>
-        </div>
-        <div className="nav-tabs">
-          <NavLink to="/overview">Overview</NavLink>
-          <NavLink to="/transactions">Transactions</NavLink>
-          <NavLink to="/BudgetPlanning">Budget Planning</NavLink>
-        </div>
-          <div className="profile-section">
-          <img
-            src="https://i.pravatar.cc/40"
-            alt="User"
-            className="profile-pic"
-          />
-          <div className="profile-info">
-            <span className="welcome">Welcome</span>
-            <span className="username">Purity</span>
-          </div>
-        </div>
-      
-      </nav>
-
+              <div className="logo-container">
+                <img src={logo} alt="MoneyMesh Logo" className="logo" />
+                <span className="brand">MoneyMesh</span>
+              </div>
+              <div className="nav-tabs">
+                <NavLink to="/overview" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+                  Overview
+                </NavLink>
+                <NavLink to="/transactions" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+                  Transactions
+                </NavLink>
+                <NavLink to="/budget-planning" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
+                  Budget Planning
+                </NavLink>
+              </div>
+              <div className="profile-section">
+                <img
+                  src="https://i.pravatar.cc/40"
+                  alt="User"
+                  className="profile-pic"
+                />
+                
+              </div>
+            </nav>
       <h2>Budget Planning</h2>
-
       {message && <p className="message">{message}</p>}
 
-      <form onSubmit={handleAddBudget}>
+      <form onSubmit={handleAddOrUpdateBudget}>
         <select
           value={formData.category}
-          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          onChange={e => setFormData({ ...formData, category: e.target.value })}
         >
           <option value="">Select Category</option>
           {categories.map(cat => (
@@ -70,15 +158,19 @@ const BudgetPlanning = () => {
           type="number"
           placeholder="Budget Limit"
           value={formData.limit}
-          onChange={(e) => setFormData({ ...formData, limit: e.target.value })}
+          onChange={e => setFormData({ ...formData, limit: e.target.value })}
         />
-        <input
-          type="text"
-          placeholder="Duration"
+        <select
           value={formData.duration}
-          onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-        />
-        <button type="submit">Add Budget</button>
+          onChange={e => setFormData({ ...formData, duration: e.target.value })}
+        >
+          <option value="">Select Duration</option>
+          <option value="Weekly">Weekly</option>
+          <option value="Monthly">Monthly</option>
+          <option value="Yearly">Yearly</option>
+        </select>
+        <button type="submit">{editingBudget ? 'Update' : 'Add Budget'}</button>
+        {editingBudget && <button type="button" onClick={() => { setEditingBudget(null); setFormData({ category: '', limit: '', duration: '' }); }}>Cancel</button>}
       </form>
 
       <table>
@@ -86,7 +178,11 @@ const BudgetPlanning = () => {
           <tr>
             <th>Category</th>
             <th>Limit</th>
-            <th>Duration</th>
+            <th>Spent</th>
+            <th>Left</th>
+            <th>Status</th>
+            <th>Progress</th>
+            <th>Days Remaining</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -95,8 +191,30 @@ const BudgetPlanning = () => {
             <tr key={b.id}>
               <td>{b.category}</td>
               <td>{b.limit}</td>
-              <td>{b.duration}</td>
-              <td><button onClick={() => handleDelete(b.id)}>Delete</button></td>
+              <td>{b.spent}</td>
+              <td>{b.limit - b.spent}</td>
+              <td>{getStatus(b)}</td>
+              <td>
+                <div style={{
+                  background: '#ddd',
+                  height: '10px',
+                  width: '100px',
+                  borderRadius: '4px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    width: `${(b.spent / b.limit) * 100}%`,
+                    background: getProgressColor(b),
+                    height: '100%'
+                  }}></div>
+                </div>
+              </td>
+              <td>{getDaysRemaining(b)}</td>
+              <td>
+                <button onClick={() => { setEditingBudget(b); setFormData({ category: b.category, limit: b.limit, duration: b.duration }); }}>Edit</button>
+                <button onClick={() => handleDelete(b.id)}>Delete</button>
+                <button onClick={() => handleDeposit(b)}>Deposit</button>
+              </td>
             </tr>
           ))}
         </tbody>

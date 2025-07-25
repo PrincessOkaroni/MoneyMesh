@@ -29,6 +29,77 @@
       "fullName": "purity",
       "email": "nekesapurity20@gmail.com",
       "password": "2222"
+    },
+    {
+      "id": "a28d",
+      "fullName": "Justin Tutu",
+      "email": "jstntutu3@gmail.com",
+      "password": "tutu"
+    }
+  ],
+  "budgets": [
+    {
+      "id": "1",
+      "category": "Bills",
+      "limit": 500,
+      "spent": 590,
+      "duration": "Monthly",
+      "startDate": "2025-07-01T00:00:00.000Z",
+      "creationDate": "2025-07-01T00:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "category": "Investment and Savings",
+      "limit": 1000,
+      "spent": 400,
+      "duration": "Monthly",
+      "startDate": "2025-07-01T00:00:00.000Z",
+      "creationDate": "2025-07-01T00:00:00.000Z"
+    },
+    {
+      "id": "ee84",
+      "category": "Bills",
+      "limit": 500,
+      "duration": "Weekly",
+      "spent": 450,
+      "creationDate": "2025-07-25T20:51:28.542Z",
+      "startDate": "2025-07-25T20:51:28.542Z"
+    },
+    {
+      "id": "12dd",
+      "category": "Others",
+      "limit": 6000,
+      "duration": "Monthly",
+      "spent": 4500,
+      "creationDate": "2025-07-25T21:01:57.295Z",
+      "startDate": "2025-07-25T21:01:57.295Z"
+    },
+    {
+      "id": "3f19",
+      "category": "Entertainment",
+      "limit": 600,
+      "duration": "Weekly",
+      "spent": 550,
+      "creationDate": "2025-07-25T21:21:57.446Z",
+      "startDate": "2025-07-25T21:21:57.446Z"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "1",
+      "type": "Income",
+      "date": "2025-07-10",
+      "category": "Bills",
+      "description": "Salary",
+      "amount": 500
+    },
+    {
+      "id": "2",
+      "type": "Expense",
+      "date": "2025-07-12",
+      "category": "Entertainment",
+      "description": "Movie ticket",
+      "amount": 50
     }
   ]
 }
