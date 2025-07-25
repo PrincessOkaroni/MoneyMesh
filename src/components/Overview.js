@@ -21,7 +21,7 @@ const Overview = () => {
   const [modal, setModal] = useState(null); // null, 'income', 'expense', 'savings'
   const [formData, setFormData] = useState({ amount: '', description: '', category: '' });
   const [filter, setFilter] = useState('This Month');
-
+  const user = JSON.parse(localStorage.getItem('user')) || {}; // Get user data from localStorage
   // Filter transactions based on date
   const filteredTransactions = transactions.filter((transaction) => {
     if (filter === 'This Month') {

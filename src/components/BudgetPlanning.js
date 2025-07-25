@@ -38,6 +38,18 @@ const BudgetPlanning = () => {
           <NavLink to="/transactions">Transactions</NavLink>
           <NavLink to="/BudgetPlanning">Budget Planning</NavLink>
         </div>
+          <div className="profile-section">
+          <img
+            src="https://i.pravatar.cc/40"
+            alt="User"
+            className="profile-pic"
+          />
+          <div className="profile-info">
+            <span className="welcome">Welcome</span>
+            <span className="username">Purity</span>
+          </div>
+        </div>
+      
       </nav>
 
       <h2>Budget Planning</h2>
