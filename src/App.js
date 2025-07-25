@@ -2,7 +2,7 @@ import React, { useState, createContext, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Landing from './components/LandingPage';
 import Overview from './components/Overview';
-import Transaction from './components/Transaction';
+import Transactions from './components/Transaction';
 import BudgetPlanning from './components/BudgetPlanning';
  
 
@@ -25,7 +25,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/overview" element={<Overview />} />
-          <Route path="/transaction" element={<Transaction />} />
+          <Route path="/transactions" element={<Transactions />} />
           <Route path="/budget-planning" element={<BudgetPlanning />} />
         </Routes>
       </Router>
