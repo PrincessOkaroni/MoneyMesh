@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import './Overview.css';
 import logo from '../assets/moneymesh-logo.png';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useFinancial } from '../App';
 
-// Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const Overview = () => {
@@ -15,14 +14,23 @@ const Overview = () => {
     setFinancialData,
     transactions,
     setTransactions,
-    user, // <-- Make sure user is provided in your context
   } = useFinancial();
 
-  const [modal, setModal] = useState(null); // null, 'income', 'expense', 'savings'
+  const navigate = useNavigate();
+  const [modal, setModal] = useState(null);
   const [formData, setFormData] = useState({ amount: '', description: '', category: '' });
   const [filter, setFilter] = useState('This Month');
-  const user = JSON.parse(localStorage.getItem('user')) || {}; // Get user data from localStorage
-  // Filter transactions based on date
+
+  // Get user from localStorage
+  const user = JSON.parse(localStorage.getItem('user')) || {};
+
+  // Redirect to login if no user is found
+  useEffect(() => {
+    if (!user.firstName) {
+      navigate('/login');
+    }
+  }, [user.firstName, navigate]);
+
   const filteredTransactions = transactions.filter((transaction) => {
     if (filter === 'This Month') {
       return transaction.date.includes('Jul 2025');
@@ -32,7 +40,6 @@ const Overview = () => {
     return true;
   });
 
-  // Pie chart data
   const income = financialData.income || 0;
   const chartData = {
     labels: ['Investment and Savings', 'Bills', 'General Upkeep', 'Entertainment', 'Others'],
@@ -175,16 +182,14 @@ const Overview = () => {
           <NavLink to="/budget-planning" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
             Budget Planning
           </NavLink>
+          <button onClick={() => { localStorage.removeItem('user'); navigate('/login'); }} className="btn btn-signout">
+            Sign Out
+          </button>
         </div>
         <div className="profile-section">
-          <img
-            src="https://i.pravatar.cc/40"
-            alt="User"
-            className="profile-pic"
-          />
+          <img src="https://i.pravatar.cc/40" alt="User" className="profile-pic" />
           <div className="profile-info">
-            <span className="welcome">Welcome</span>
-            <span className="username">{user?.firstName || 'User'}</span>
+            <span className="welcome">Welcome, {user?.firstName || 'User'}</span>
           </div>
         </div>
       </nav>

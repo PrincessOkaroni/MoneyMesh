@@ -2,25 +2,25 @@
   "users": [
     {
       "id": "1",
-      "fullName": "Jane Doe",
+      "firstName": "Jane Doe",
       "email": "jane@example.com",
       "password": "password123"
     },
     {
       "id": "2",
-      "fullName": "John Smith",
+      "firstName": "John Smith",
       "email": "john@example.com",
       "password": "mypassword"
     },
     {
       "id": "63e1",
-      "fullName": "Pury tuuu",
+      "firstName": "Pury tuuu",
       "email": "purity@gmail.com",
       "password": "567567567"
     },
     {
       "id": "dd05",
-      "fullName": "qwertgy rtyu",
+      "firstName": "qwertgy rtyu",
       "email": "wereto@gmail.com",
       "password": "weretoo"
     },
@@ -29,6 +29,18 @@
       "fullName": "purity",
       "email": "nekesapurity20@gmail.com",
       "password": "2222"
+    },
+    {
+      "id": "9844",
+      "firstName": "Ryan simiyu",
+      "email": "ryan08@gmail.com",
+      "password": "8822"
+    },
+    {
+      "id": "ee87",
+      "firstName": "James",
+      "email": "james23@gmail.com",
+      "password": "1101"
     }
   ]
 }
