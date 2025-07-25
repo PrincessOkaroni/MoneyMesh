@@ -8,8 +8,7 @@ const apiUrl = "http://localhost:3001/transactions";
 const categories = ["Bills", "Entertainment", "Investment and Savings", "General Upkeep", "Others"];
 
 const Transaction = () => {
-  // eslint-disable-next-line no-unused-vars
-  const { transactions, setTransactions, financialData, setFinancialData } = useFinancial();
+  const { transactions, setTransactions } = useFinancial();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     type: "Income",
@@ -23,32 +22,22 @@ const Transaction = () => {
   const [filterEndDate, setFilterEndDate] = useState("");
   const [message, setMessage] = useState("");
 
-  // Get user from localStorage
-  const user = JSON.parse(localStorage.getItem('user')) || {};
+  const user = JSON.parse(localStorage.getItem('user'));
 
-  // Redirect to login if no user is found and fetch transactions
+  // Redirect and fetch transactions
   useEffect(() => {
-    if (!user.firstName) {
+    if (!user?.firstName) {
       navigate('/login');
       return;
     }
 
-    // Fetch transactions from API
-    fetch(apiUrl)
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-        return res.json();
-      })
-      .then(data => setTransactions(data))
-      .catch(err => {
-        console.error("Error fetching transactions:", err);
-        setMessage("Failed to fetch transactions");
-        setTimeout(() => setMessage(""), 2000);
-      });
-  }, [user.firstName, navigate, setTransactions]);
+fetch(apiUrl)
+  .then(res => res.json())
+  .then(data => setTransactions(data))
+  .catch(err => console.error("Error fetching:", err));
+  }, [user, navigate, setTransactions]);
 
   useEffect(() => {
-    // Sync transactions with localStorage for persistence
     localStorage.setItem("transactions", JSON.stringify(transactions));
   }, [transactions]);
 
@@ -68,90 +57,39 @@ const Transaction = () => {
       return;
     }
 
-    const amount = parseFloat(formData.amount);
-    const typeKey = formData.type.toLowerCase();
-    const transactionData = { ...formData, amount };
+const amount = parseFloat(formData.amount);
+const transactionData = { ...formData, amount };
 
-    if (editingId !== null) {
-      // Update existing transaction
-      fetch(`${apiUrl}/${editingId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(transactionData),
-      })
-        .then(res => {
-          if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-          return res.json();
-        })
-        .then(updated => {
-          setTransactions(transactions.map(t => t.id === editingId ? updated : t));
-          setFinancialData((prev) => {
-            const oldTransaction = transactions.find(t => t.id === editingId);
-            const oldAmount = parseFloat(oldTransaction.amount);
-            const oldTypeKey = oldTransaction.type.toLowerCase();
-            const newFinancialData = { ...prev };
+if (editingId !== null) {
+  // Update existing transaction
+  fetch(`${apiUrl}/${editingId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(transactionData),
+  })
+    .then(res => res.json())
+    .then(updated => {
+      setTransactions(transactions.map(t => t.id === editingId ? updated : t));
+      setMessage("Transaction updated!");
+      setEditingId(null);
+      setFormData({ type: "Income", date: "", category: "", description: "", amount: "" });
+    });
+} else {
+  // Add new transaction
+  fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(transactionData),
+  })
+    .then(res => res.json())
+    .then(newTxn => {
+      setTransactions([...transactions, newTxn]);
+      setMessage("Transaction added!");
+      setFormData({ type: "Income", date: "", category: "", description: "", amount: "" });
+    });
+}
 
-            // Revert old transaction effect
-            if (oldTypeKey === 'income') {
-              newFinancialData.income -= oldAmount;
-              newFinancialData.balance -= oldAmount;
-            } else if (oldTypeKey === 'expense') {
-              newFinancialData.expense -= oldAmount;
-              newFinancialData.balance += oldAmount;
-            } else if (oldTypeKey === 'savings') {
-              newFinancialData.savings -= oldAmount;
-              newFinancialData.balance += oldAmount;
-            }
-
-            // Apply new transaction effect
-            if (typeKey === 'income') {
-              newFinancialData.income += amount;
-              newFinancialData.balance += amount;
-            } else if (typeKey === 'expense') {
-              newFinancialData.expense += amount;
-              newFinancialData.balance -= amount;
-            } else if (typeKey === 'savings') {
-              newFinancialData.savings += amount;
-              newFinancialData.balance -= amount;
-            }
-
-            return newFinancialData;
-          });
-          setMessage("Transaction updated!");
-          setEditingId(null);
-          setFormData({ type: "Income", date: "", category: "", description: "", amount: "" });
-        })
-        .catch(err => {
-          console.error("Error updating transaction:", err);
-          setMessage("Error updating transaction");
-        });
-    } else {
-      // Add new transaction
-      fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(transactionData),
-      })
-        .then(res => {
-          if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-          return res.json();
-        })
-        .then(newTxn => {
-          setTransactions([...transactions, newTxn]);
-          setFinancialData((prev) => ({
-            ...prev,
-            [typeKey]: prev[typeKey] + amount,
-            balance: typeKey === 'income' ? prev.balance + amount : prev.balance - amount,
-          }));
-          setMessage("Transaction added!");
-          setFormData({ type: "Income", date: "", category: "", description: "", amount: "" });
-        })
-        .catch(err => {
-          console.error("Error adding transaction:", err);
-          setMessage("Error adding transaction");
-        });
-    }
-    setTimeout(() => setMessage(""), 2000);
+setTimeout(() => setMessage(""), 2000);
   };
 
   const handleEdit = (id) => {
@@ -166,32 +104,11 @@ const Transaction = () => {
   };
 
   const handleDelete = (id) => {
-    const transaction = transactions.find(t => t.id === id);
-    if (!transaction) {
-      setMessage("Transaction not found");
-      setTimeout(() => setMessage(""), 2000);
-      return;
-    }
-
-    fetch(`${apiUrl}/${id}`, { method: "DELETE" })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+    fetch(${apiUrl}/${id}, { method: "DELETE" })
+      .then(() => {
         setTransactions(transactions.filter(t => t.id !== id));
-        setFinancialData((prev) => {
-          const amount = parseFloat(transaction.amount);
-          const typeKey = transaction.type.toLowerCase();
-          return {
-            ...prev,
-            [typeKey]: prev[typeKey] - amount,
-            balance: typeKey === 'income' ? prev.balance - amount : prev.balance + amount,
-          };
-        });
         setMessage("Transaction deleted!");
         setTimeout(() => setMessage(""), 2000);
-      })
-      .catch(err => {
-        console.error("Error deleting transaction:", err);
-        setMessage("Error deleting transaction");
       });
   };
 
@@ -202,12 +119,10 @@ const Transaction = () => {
 
   const handleDownloadCSV = () => {
     const headers = ["Type", "Date", "Category", "Description", "Amount"];
-    const rows = filteredTransactions.map((txn) =>
-      [txn.type, new Date(txn.date).toLocaleDateString('en-GB'), txn.category, txn.description, txn.amount]
+    const rows = filteredTransactions.map(txn =>
+      [txn.type, txn.date, txn.category, txn.description, txn.amount]
     );
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers, ...rows].map((e) => e.join(",")).join("\n");
+    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map(e => e.join(",")).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.href = encodedUri;
@@ -236,18 +151,10 @@ const Transaction = () => {
           <span className="brand">MoneyMesh</span>
         </div>
         <div className="nav-tabs">
-          <NavLink to="/overview" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
-            Overview
-          </NavLink>
-          <NavLink to="/transactions" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
-            Transactions
-          </NavLink>
-          <NavLink to="/budget-planning" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
-            Budget Planning
-          </NavLink>
-          <button onClick={() => { localStorage.removeItem('user'); navigate('/login'); }} className="btn btn-signout">
-            Sign Out
-          </button>
+          <NavLink to="/overview" className={({ isActive }) => nav-tab ${isActive ? 'nav-tab-active' : ''}}>Overview</NavLink>
+          <NavLink to="/transactions" className={({ isActive }) => nav-tab ${isActive ? 'nav-tab-active' : ''}}>Transactions</NavLink>
+          <NavLink to="/budget-planning" className={({ isActive }) => nav-tab ${isActive ? 'nav-tab-active' : ''}}>Budget Planning</NavLink>
+          <button onClick={() => { localStorage.removeItem('user'); navigate('/login'); }} className="btn btn-signout">Sign Out</button>
         </div>
         <div className="profile-section">
           <img src="https://i.pravatar.cc/40" alt="User" className="profile-pic" />
@@ -257,98 +164,97 @@ const Transaction = () => {
         </div>
       </nav>
 
-      {message && <p className="message">{message}</p>}
+  {message && <p className="message">{message}</p>}
 
-      <div className="transaction-section">
-        <div className="transaction-table">
-          <h2>Transaction List</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTransactions.map((txn) => (
-                <tr key={txn.id}>
-                  <td>{txn.type}</td>
-                  <td>{new Date(txn.date).toLocaleDateString('en-GB')}</td>
-                  <td>{txn.category}</td>
-                  <td>{txn.description}</td>
-                  <td>{Number(txn.amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
-                  <td>
-                    <button onClick={() => handleEdit(txn.id)}>Edit</button>
-                    <button onClick={() => handleDelete(txn.id)}>Delete</button>
-                  </td>
-                </tr>
-              ))}
-              <tr>
-                <td colSpan="4"><strong>Total</strong></td>
-                <td colSpan="2"><strong>{totalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</strong></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div className="transaction-form-table">
-          <h2>Add / Edit Transaction</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <select name="type" value={formData.type} onChange={handleChange} required>
-                    <option value="Income">Income</option>
-                    <option value="Expense">Expense</option>
-                    <option value="Savings">Savings</option>
-                  </select>
-                </td>
-                <td><input type="date" name="date" value={formData.date} onChange={handleChange} required /></td>
-                <td>
-                  <select name="category" value={formData.category} onChange={handleChange} required>
-                    <option value="">Select</option>
-                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                  </select>
-                </td>
-                <td><input type="text" name="description" value={formData.description} onChange={handleChange} /></td>
-                <td><input type="number" name="amount" value={formData.amount} onChange={handleChange} required /></td>
-                <td>
-                  <button onClick={handleAddTransaction}>{editingId !== null ? "Update" : "Add"}</button>
-                  <button onClick={handleClearForm}>Clear</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="transaction-controls">
-        <button className="download-btn" onClick={handleDownloadCSV}>
-          Download CSV
-        </button>
-        <div className="date-filter">
-          <label>From:</label>
-          <input type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)} />
-          <label>To:</label>
-          <input type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)} />
-        </div>
-      </div>
+  <div className="transaction-section">
+    <div className="transaction-table">
+      <h2>Transaction List</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredTransactions.map((txn) => (
+            <tr key={txn.id}>
+              <td>{txn.type}</td>
+              <td>{new Date(txn.date).toLocaleDateString('en-GB')}</td>
+              <td>{txn.category}</td>
+              <td>{txn.description}</td>
+              <td>{Number(txn.amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+              <td>
+                <button onClick={() => handleEdit(txn.id)}>Edit</button>
+                <button onClick={() => handleDelete(txn.id)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+          <tr>
+            <td colSpan="4"><strong>Total</strong></td>
+            <td colSpan="2"><strong>{totalAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</strong></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+
+    <div className="transaction-form-table">
+      <h2>Add / Edit Transaction</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <select name="type" value={formData.type} onChange={handleChange} required>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+                <option value="Savings">Savings</option>
+              </select>
+            </td>
+            <td><input type="date" name="date" value={formData.date} onChange={handleChange} required /></td>
+            <td>
+              <select name="category" value={formData.category} onChange={handleChange} required>
+                <option value="">Select</option>
+                {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+            </td>
+            <td><input type="text" name="description" value={formData.description} onChange={handleChange} /></td>
+            <td><input type="number" name="amount" value={formData.amount} onChange={handleChange} required /></td>
+            <td>
+              <button onClick={handleAddTransaction}>{editingId !== null ? "Update" : "Add"}</button>
+              <button onClick={handleClearForm}>Clear</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div className="transaction-controls">
+    <button className="download-btn" onClick={handleDownloadCSV}>Download CSV</button>
+    <div className="date-filter">
+      <label>From:</label>
+      <input type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)} />
+      <label>To:</label>
+      <input type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)} />
+    </div>
+  </div>
+</div>
   );
 };
 
 export default Transaction;
+
