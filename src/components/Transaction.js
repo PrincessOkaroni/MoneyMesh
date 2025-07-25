@@ -23,74 +23,132 @@ const Transaction = () => {
   const [filterEndDate, setFilterEndDate] = useState("");
   const [message, setMessage] = useState("");
 
-
-  const user = { firstName: "Purity" };
-
   // Get user from localStorage
-  const user = JSON.parse(localStorage.getItem('user')) 
+  const user = JSON.parse(localStorage.getItem('user')) || {};
 
-  // Redirect to login if no user is found
+  // Redirect to login if no user is found and fetch transactions
   useEffect(() => {
-
-    fetch(apiUrl)
-      .then(res => res.json())
-      .then(data => setTransactions(data))
-      .catch(err => console.error("Error fetching:", err));
-  }, []);
-
-
     if (!user.firstName) {
       navigate('/login');
+      return;
     }
-  }, [user.firstName, navigate]);
+
+    // Fetch transactions from API
+    fetch(apiUrl)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        return res.json();
+      })
+      .then(data => setTransactions(data))
+      .catch(err => {
+        console.error("Error fetching transactions:", err);
+        setMessage("Failed to fetch transactions");
+        setTimeout(() => setMessage(""), 2000);
+      });
+  }, [user.firstName, navigate, setTransactions]);
 
   useEffect(() => {
     // Sync transactions with localStorage for persistence
     localStorage.setItem("transactions", JSON.stringify(transactions));
   }, [transactions]);
 
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleAddTransaction = () => {
-
     if (!formData.date || !formData.category || !formData.amount) {
-      alert("Please fill all fields");
+      setMessage("Please fill all required fields");
+      setTimeout(() => setMessage(""), 2000);
       return;
     }
     if (parseFloat(formData.amount) <= 0) {
-      alert("Amount must be greater than zero");
+      setMessage("Amount must be greater than zero");
+      setTimeout(() => setMessage(""), 2000);
       return;
     }
+
+    const amount = parseFloat(formData.amount);
+    const typeKey = formData.type.toLowerCase();
+    const transactionData = { ...formData, amount };
 
     if (editingId !== null) {
       // Update existing transaction
       fetch(`${apiUrl}/${editingId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(transactionData),
       })
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+          return res.json();
+        })
         .then(updated => {
           setTransactions(transactions.map(t => t.id === editingId ? updated : t));
+          setFinancialData((prev) => {
+            const oldTransaction = transactions.find(t => t.id === editingId);
+            const oldAmount = parseFloat(oldTransaction.amount);
+            const oldTypeKey = oldTransaction.type.toLowerCase();
+            const newFinancialData = { ...prev };
+
+            // Revert old transaction effect
+            if (oldTypeKey === 'income') {
+              newFinancialData.income -= oldAmount;
+              newFinancialData.balance -= oldAmount;
+            } else if (oldTypeKey === 'expense') {
+              newFinancialData.expense -= oldAmount;
+              newFinancialData.balance += oldAmount;
+            } else if (oldTypeKey === 'savings') {
+              newFinancialData.savings -= oldAmount;
+              newFinancialData.balance += oldAmount;
+            }
+
+            // Apply new transaction effect
+            if (typeKey === 'income') {
+              newFinancialData.income += amount;
+              newFinancialData.balance += amount;
+            } else if (typeKey === 'expense') {
+              newFinancialData.expense += amount;
+              newFinancialData.balance -= amount;
+            } else if (typeKey === 'savings') {
+              newFinancialData.savings += amount;
+              newFinancialData.balance -= amount;
+            }
+
+            return newFinancialData;
+          });
           setMessage("Transaction updated!");
           setEditingId(null);
           setFormData({ type: "Income", date: "", category: "", description: "", amount: "" });
+        })
+        .catch(err => {
+          console.error("Error updating transaction:", err);
+          setMessage("Error updating transaction");
         });
     } else {
       // Add new transaction
       fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(transactionData),
       })
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+          return res.json();
+        })
         .then(newTxn => {
           setTransactions([...transactions, newTxn]);
+          setFinancialData((prev) => ({
+            ...prev,
+            [typeKey]: prev[typeKey] + amount,
+            balance: typeKey === 'income' ? prev.balance + amount : prev.balance - amount,
+          }));
           setMessage("Transaction added!");
           setFormData({ type: "Income", date: "", category: "", description: "", amount: "" });
+        })
+        .catch(err => {
+          console.error("Error adding transaction:", err);
+          setMessage("Error adding transaction");
         });
     }
     setTimeout(() => setMessage(""), 2000);
@@ -99,114 +157,42 @@ const Transaction = () => {
   const handleEdit = (id) => {
     const txn = transactions.find(t => t.id === id);
     if (txn) {
-      setFormData(txn);
+      setFormData({
+        ...txn,
+        amount: txn.amount.toString(),
+      });
       setEditingId(id);
     }
   };
 
   const handleDelete = (id) => {
-    fetch(`${apiUrl}/${id}`, { method: "DELETE" })
-      .then(() => {
-        setTransactions(transactions.filter(t => t.id !== id));
-        setMessage("Transaction deleted!");
-        setTimeout(() => setMessage(""), 2000);
-      });
-
-    if (!formData.date || !formData.category || !formData.description || !formData.amount || isNaN(formData.amount) || formData.amount <= 0) {
-      alert('Please fill in all fields with valid data');
+    const transaction = transactions.find(t => t.id === id);
+    if (!transaction) {
+      setMessage("Transaction not found");
+      setTimeout(() => setMessage(""), 2000);
       return;
     }
 
-    const amount = parseFloat(formData.amount);
-    const newTransaction = {
-      ...formData,
-      amount,
-      id: editingIndex !== null ? transactions[editingIndex].id : transactions.length + 1,
-    };
-
-    if (editingIndex !== null) {
-      const oldTransaction = transactions[editingIndex];
-      const oldAmount = parseFloat(oldTransaction.amount);
-      const updated = [...transactions];
-      updated[editingIndex] = newTransaction;
-
-      setFinancialData((prev) => {
-        const typeKey = newTransaction.type.toLowerCase();
-        const oldTypeKey = oldTransaction.type.toLowerCase();
-        const newFinancialData = { ...prev };
-
-        // Revert old transaction effect
-        if (oldTypeKey === 'income') {
-          newFinancialData.income -= oldAmount;
-          newFinancialData.balance -= oldAmount;
-        } else if (oldTypeKey === 'expense') {
-          newFinancialData.expense -= oldAmount;
-          newFinancialData.balance += oldAmount;
-        } else if (oldTypeKey === 'savings') {
-          newFinancialData.savings -= oldAmount;
-          newFinancialData.balance += oldAmount;
-        }
-
-        // Apply new transaction effect
-        if (typeKey === 'income') {
-          newFinancialData.income += amount;
-          newFinancialData.balance += amount;
-        } else if (typeKey === 'expense') {
-          newFinancialData.expense += amount;
-          newFinancialData.balance -= amount;
-        } else if (typeKey === 'savings') {
-          newFinancialData.savings += amount;
-          newFinancialData.balance -= amount;
-        }
-
-        return newFinancialData;
+    fetch(`${apiUrl}/${id}`, { method: "DELETE" })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        setTransactions(transactions.filter(t => t.id !== id));
+        setFinancialData((prev) => {
+          const amount = parseFloat(transaction.amount);
+          const typeKey = transaction.type.toLowerCase();
+          return {
+            ...prev,
+            [typeKey]: prev[typeKey] - amount,
+            balance: typeKey === 'income' ? prev.balance - amount : prev.balance + amount,
+          };
+        });
+        setMessage("Transaction deleted!");
+        setTimeout(() => setMessage(""), 2000);
+      })
+      .catch(err => {
+        console.error("Error deleting transaction:", err);
+        setMessage("Error deleting transaction");
       });
-
-      setTransactions(updated);
-      setEditingIndex(null);
-    } else {
-      setTransactions([...transactions, newTransaction]);
-      setFinancialData((prev) => {
-        const typeKey = newTransaction.type.toLowerCase();
-        return {
-          ...prev,
-          [typeKey]: prev[typeKey] + amount,
-          balance: typeKey === 'income' ? prev.balance + amount : prev.balance - amount,
-        };
-      });
-    }
-
-    setFormData({
-      type: "Income",
-      date: "",
-      category: "",
-      description: "",
-      amount: "",
-    });
-  };
-
-  const handleEdit = (index) => {
-    setFormData({
-      ...transactions[index],
-      amount: transactions[index].amount.toString(),
-    });
-    setEditingIndex(index);
-  };
-
-  const handleDelete = (index) => {
-    const transaction = transactions[index];
-    const amount = parseFloat(transaction.amount);
-    const typeKey = transaction.type.toLowerCase();
-
-    setFinancialData((prev) => ({
-      ...prev,
-      [typeKey]: prev[typeKey] - amount,
-      balance: typeKey === 'income' ? prev.balance - amount : prev.balance + amount,
-    }));
-
-    const updated = transactions.filter((_, i) => i !== index);
-    setTransactions(updated);
-
   };
 
   const handleClearForm = () => {
@@ -217,7 +203,7 @@ const Transaction = () => {
   const handleDownloadCSV = () => {
     const headers = ["Type", "Date", "Category", "Description", "Amount"];
     const rows = filteredTransactions.map((txn) =>
-      [txn.type, txn.date, txn.category, txn.description, txn.amount]
+      [txn.type, new Date(txn.date).toLocaleDateString('en-GB'), txn.category, txn.description, txn.amount]
     );
     const csvContent =
       "data:text/csv;charset=utf-8," +
@@ -250,11 +236,6 @@ const Transaction = () => {
           <span className="brand">MoneyMesh</span>
         </div>
         <div className="nav-tabs">
-
-          <NavLink to="/overview">Overview</NavLink>
-          <NavLink to="/transactions">Transactions</NavLink>
-          <NavLink to="/budget-planning">Budget Planning</NavLink>
-
           <NavLink to="/overview" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
             Overview
           </NavLink>
@@ -267,17 +248,11 @@ const Transaction = () => {
           <button onClick={() => { localStorage.removeItem('user'); navigate('/login'); }} className="btn btn-signout">
             Sign Out
           </button>
-
         </div>
         <div className="profile-section">
           <img src="https://i.pravatar.cc/40" alt="User" className="profile-pic" />
           <div className="profile-info">
-
-            <span className="welcome">Welcome</span>
-            <span className="username">{user.firstName}</span>
-
             <span className="welcome">Welcome, {user?.firstName || 'User'}</span>
-
           </div>
         </div>
       </nav>
@@ -299,15 +274,10 @@ const Transaction = () => {
               </tr>
             </thead>
             <tbody>
-
               {filteredTransactions.map((txn) => (
                 <tr key={txn.id}>
-
-              {filteredTransactions.map((txn, index) => (
-                <tr key={txn.id || index}>
-
                   <td>{txn.type}</td>
-                  <td>{new Date(txn.date).toLocaleDateString()}</td>
+                  <td>{new Date(txn.date).toLocaleDateString('en-GB')}</td>
                   <td>{txn.category}</td>
                   <td>{txn.description}</td>
                   <td>{Number(txn.amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
@@ -341,21 +311,21 @@ const Transaction = () => {
             <tbody>
               <tr>
                 <td>
-                  <select name="type" value={formData.type} onChange={handleChange}>
+                  <select name="type" value={formData.type} onChange={handleChange} required>
                     <option value="Income">Income</option>
                     <option value="Expense">Expense</option>
                     <option value="Savings">Savings</option>
                   </select>
                 </td>
-                <td><input type="date" name="date" value={formData.date} onChange={handleChange} /></td>
+                <td><input type="date" name="date" value={formData.date} onChange={handleChange} required /></td>
                 <td>
-                  <select name="category" value={formData.category} onChange={handleChange}>
+                  <select name="category" value={formData.category} onChange={handleChange} required>
                     <option value="">Select</option>
                     {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                   </select>
                 </td>
                 <td><input type="text" name="description" value={formData.description} onChange={handleChange} /></td>
-                <td><input type="number" name="amount" value={formData.amount} onChange={handleChange} /></td>
+                <td><input type="number" name="amount" value={formData.amount} onChange={handleChange} required /></td>
                 <td>
                   <button onClick={handleAddTransaction}>{editingId !== null ? "Update" : "Add"}</button>
                   <button onClick={handleClearForm}>Clear</button>
