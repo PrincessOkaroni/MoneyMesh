@@ -8,7 +8,7 @@ const apiUrl = "http://localhost:3001/transactions";
 const categories = ["Bills", "Entertainment", "Investment and Savings", "General Upkeep", "Others"];
 
 const Transaction = () => {
-  const { transactions, setTransactions, } = useFinancial();
+  const { transactions, setTransactions } = useFinancial();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     type: "Income",
@@ -22,25 +22,21 @@ const Transaction = () => {
   const [filterEndDate, setFilterEndDate] = useState("");
   const [message, setMessage] = useState("");
 
-  // Get user from localStorage
   const user = JSON.parse(localStorage.getItem('user'));
 
-  // Redirect to login if no user is found
+  // Redirect and fetch transactions
   useEffect(() => {
     if (!user?.firstName) {
       navigate('/login');
+      return;
     }
-  }, [user, navigate]);
 
-  // Fetch transactions on mount
-  useEffect(() => {
     fetch(apiUrl)
       .then(res => res.json())
       .then(data => setTransactions(data))
       .catch(err => console.error("Error fetching:", err));
-  }, [setTransactions]);
+  }, [user, navigate, setTransactions]);
 
-  // Sync to localStorage
   useEffect(() => {
     localStorage.setItem("transactions", JSON.stringify(transactions));
   }, [transactions]);
@@ -51,20 +47,25 @@ const Transaction = () => {
 
   const handleAddTransaction = () => {
     if (!formData.date || !formData.category || !formData.amount) {
-      alert("Please fill all fields");
+      setMessage("Please fill all required fields");
+      setTimeout(() => setMessage(""), 2000);
       return;
     }
     if (parseFloat(formData.amount) <= 0) {
-      alert("Amount must be greater than zero");
+      setMessage("Amount must be greater than zero");
+      setTimeout(() => setMessage(""), 2000);
       return;
     }
 
+    const amount = parseFloat(formData.amount);
+    const transactionData = { ...formData, amount };
+
     if (editingId !== null) {
-      // Update transaction
+      // Update existing transaction
       fetch(`${apiUrl}/${editingId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(transactionData),
       })
         .then(res => res.json())
         .then(updated => {
@@ -78,7 +79,7 @@ const Transaction = () => {
       fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(transactionData),
       })
         .then(res => res.json())
         .then(newTxn => {
@@ -158,8 +159,7 @@ const Transaction = () => {
         <div className="profile-section">
           <img src="https://i.pravatar.cc/40" alt="User" className="profile-pic" />
           <div className="profile-info">
-            <span className="welcome">Welcome,</span>
-            <span className="username">{user?.firstName || 'User'}</span>
+            <span className="welcome">Welcome, {user?.firstName || 'User'}</span>
           </div>
         </div>
       </nav>
@@ -184,7 +184,7 @@ const Transaction = () => {
               {filteredTransactions.map((txn) => (
                 <tr key={txn.id}>
                   <td>{txn.type}</td>
-                  <td>{new Date(txn.date).toLocaleDateString()}</td>
+                  <td>{new Date(txn.date).toLocaleDateString('en-GB')}</td>
                   <td>{txn.category}</td>
                   <td>{txn.description}</td>
                   <td>{Number(txn.amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
@@ -218,21 +218,21 @@ const Transaction = () => {
             <tbody>
               <tr>
                 <td>
-                  <select name="type" value={formData.type} onChange={handleChange}>
+                  <select name="type" value={formData.type} onChange={handleChange} required>
                     <option value="Income">Income</option>
                     <option value="Expense">Expense</option>
                     <option value="Savings">Savings</option>
                   </select>
                 </td>
-                <td><input type="date" name="date" value={formData.date} onChange={handleChange} /></td>
+                <td><input type="date" name="date" value={formData.date} onChange={handleChange} required /></td>
                 <td>
-                  <select name="category" value={formData.category} onChange={handleChange}>
+                  <select name="category" value={formData.category} onChange={handleChange} required>
                     <option value="">Select</option>
                     {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                   </select>
                 </td>
                 <td><input type="text" name="description" value={formData.description} onChange={handleChange} /></td>
-                <td><input type="number" name="amount" value={formData.amount} onChange={handleChange} /></td>
+                <td><input type="number" name="amount" value={formData.amount} onChange={handleChange} required /></td>
                 <td>
                   <button onClick={handleAddTransaction}>{editingId !== null ? "Update" : "Add"}</button>
                   <button onClick={handleClearForm}>Clear</button>
