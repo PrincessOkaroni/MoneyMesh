@@ -3,10 +3,6 @@ import "./Transaction.css";
 import { NavLink } from 'react-router-dom';
 import logo from '../assets/moneymesh-logo.png';
 
-
-
-
-
 const Transaction = () => {
   const [transactions, setTransactions] = useState([]);
   const [formData, setFormData] = useState({
@@ -19,6 +15,11 @@ const Transaction = () => {
   const [editingIndex, setEditingIndex] = useState(null);
   const [filterStartDate, setFilterStartDate] = useState("");
   const [filterEndDate, setFilterEndDate] = useState("");
+
+  // ✅ Define user here (you can later use context or localStorage)
+  const user = {
+    firstName: "Purity", // Replace with dynamic value from auth/localStorage/context
+  };
 
   useEffect(() => {
     const storedTransactions = JSON.parse(localStorage.getItem("transactions")) || [];
@@ -91,7 +92,6 @@ const Transaction = () => {
     link.click();
     document.body.removeChild(link);
   };
-  
 
   return (
     <div className="transaction-container">
@@ -119,10 +119,11 @@ const Transaction = () => {
           />
           <div className="profile-info">
             <span className="welcome">Welcome</span>
-            <span className="username">Purity</span>
+            <span className="username">{user?.firstName || 'User'}</span>
           </div>
         </div>
       </nav>
+
       <div className="transaction-section">
         <div className="transaction-table">
           <h2 className="section-title">Transaction List</h2>
