@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./Transaction.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/moneymesh-logo.png";
-import { useFinancial } from "../App"; // ensure this is exported correctly
+import { useFinancial } from "../App";
 
 const apiUrl = "http://localhost:3001/transactions";
 const categories = ["Bills", "Entertainment", "Investment and Savings", "General Upkeep", "Others"];
@@ -29,9 +29,7 @@ const Transaction = () => {
       navigate("/login");
       return;
     }
-
     fetch(apiUrl)
-
       .then(res => res.json())
       .then(data => setTransactions(data))
       .catch(err => console.error("Error fetching:", err));
@@ -40,12 +38,6 @@ const Transaction = () => {
   useEffect(() => {
     localStorage.setItem("transactions", JSON.stringify(transactions));
   }, [transactions]);
-
-      .then((res) => res.json())
-      .then((data) => setTransactions(data))
-      .catch((err) => console.error("Error fetching transactions:", err));
-  }, [user, navigate, setTransactions]);
-
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -67,41 +59,27 @@ const Transaction = () => {
     const amount = parseFloat(formData.amount);
     const transactionData = { ...formData, amount };
 
-    if (editingId !== null) 
-      // Update
-
+    if (editingId !== null) {
       fetch(`${apiUrl}/${editingId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(transactionData),
       })
-
         .then(res => res.json())
         .then(updated => {
-          setTransactions(transactions.map(t => t.id === editingId ? updated : t));
-
-        .then((res) => res.json())
-        .then((updated) => {
-          setTransactions(transactions.map((t) => (t.id === editingId ? updated : t)));
-
+          setTransactions(transactions.map(t => (t.id === editingId ? updated : t)));
           setMessage("Transaction updated!");
           setEditingId(null);
           setFormData({ type: "Income", date: "", category: "", description: "", amount: "" });
         });
     } else {
-      // Create
       fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(transactionData),
-      }
-
+      })
         .then(res => res.json())
         .then(newTxn => {
-
-        .then((res) => res.json())
-        .then((newTxn) => {
-
           setTransactions([...transactions, newTxn]);
           setMessage("Transaction added!");
           setFormData({ type: "Income", date: "", category: "", description: "", amount: "" });
@@ -112,7 +90,7 @@ const Transaction = () => {
   };
 
   const handleEdit = (id) => {
-    const txn = transactions.find((t) => t.id === id);
+    const txn = transactions.find(t => t.id === id);
     if (txn) {
       setFormData({ ...txn, amount: txn.amount.toString() });
       setEditingId(id);
@@ -122,7 +100,7 @@ const Transaction = () => {
   const handleDelete = (id) => {
     fetch(`${apiUrl}/${id}`, { method: "DELETE" })
       .then(() => {
-        setTransactions(transactions.filter((t) => t.id !== id));
+        setTransactions(transactions.filter(t => t.id !== id));
         setMessage("Transaction deleted!");
         setTimeout(() => setMessage(""), 2000);
       });
@@ -133,34 +111,8 @@ const Transaction = () => {
     setEditingId(null);
   };
 
-  const handleDownloadCSV = () => {
-    const headers = ["Type", "Date", "Category", "Description", "Amount"];
-
-    const rows = filteredTransactions.map(txn =>
-      [txn.type, txn.date, txn.category, txn.description, txn.amount]
-    );
-    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map(e => e.join(",")).join("\n");
-
-    const rows = filteredTransactions.map((txn) => [
-      txn.type,
-      txn.date,
-      txn.category,
-      txn.description,
-      txn.amount,
-    ]);
-    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map((e) => e.join(",")).join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.href = encodedUri;
-    link.download = "transactions.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const filteredTransactions = transactions
-    .filter((txn) => {
+    .filter(txn => {
       const txnDate = new Date(txn.date);
       const start = filterStartDate ? new Date(filterStartDate) : null;
       const end = filterEndDate ? new Date(filterEndDate) : null;
@@ -170,6 +122,25 @@ const Transaction = () => {
 
   const totalAmount = filteredTransactions.reduce((acc, txn) => acc + parseFloat(txn.amount || 0), 0);
 
+  const handleDownloadCSV = () => {
+    const headers = ["Type", "Date", "Category", "Description", "Amount"];
+    const rows = filteredTransactions.map(txn => [
+      txn.type,
+      txn.date,
+      txn.category,
+      txn.description,
+      txn.amount,
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map(e => e.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.href = encodedUri;
+    link.download = "transactions.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="transaction-container">
       <nav className="navbar">
@@ -178,40 +149,15 @@ const Transaction = () => {
           <span className="brand">MoneyMesh</span>
         </div>
         <div className="nav-tabs">
-
           <NavLink to="/overview" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>Overview</NavLink>
           <NavLink to="/transactions" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>Transactions</NavLink>
           <NavLink to="/budget-planning" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>Budget Planning</NavLink>
           <button onClick={() => { localStorage.removeItem('user'); navigate('/login'); }} className="btn btn-signout">Sign Out</button>
-
-          <NavLink to="/overview" className={({ isActive }) => `nav-tab ${isActive ? "nav-tab-active" : ""}`}>
-            Overview
-          </NavLink>
-          <NavLink to="/transactions" className={({ isActive }) => `nav-tab ${isActive ? "nav-tab-active" : ""}`}>
-            Transactions
-          </NavLink>
-          <NavLink to="/budget-planning" className={({ isActive }) => `nav-tab ${isActive ? "nav-tab-active" : ""}`}>
-            Budget Planning
-          </NavLink>
-          <button
-            onClick={() => {
-              localStorage.removeItem("user");
-              navigate("/login");
-            }}
-            className="btn btn-signout"
-          >
-            Sign Out
-          </button>
-
         </div>
         <div className="profile-section">
           <img src="https://i.pravatar.cc/40" alt="User" className="profile-pic" />
           <div className="profile-info">
-
-            <span className="welcome">Welcome, {user?.firstName || 'User'}</span>
-
             <span className="welcome">Welcome, {user?.firstName || "User"}</span>
-
           </div>
         </div>
       </nav>
@@ -239,12 +185,7 @@ const Transaction = () => {
                   <td>{new Date(txn.date).toLocaleDateString("en-GB")}</td>
                   <td>{txn.category}</td>
                   <td>{txn.description}</td>
-                  <td>
-                    {Number(txn.amount).toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    })}
-                  </td>
+                  <td>{Number(txn.amount).toLocaleString("en-US", { style: "currency", currency: "USD" })}</td>
                   <td>
                     <button onClick={() => handleEdit(txn.id)}>Edit</button>
                     <button onClick={() => handleDelete(txn.id)}>Delete</button>
@@ -252,16 +193,9 @@ const Transaction = () => {
                 </tr>
               ))}
               <tr>
-                <td colSpan="4">
-                  <strong>Total</strong>
-                </td>
+                <td colSpan="4"><strong>Total</strong></td>
                 <td colSpan="2">
-                  <strong>
-                    {totalAmount.toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    })}
-                  </strong>
+                  <strong>{totalAmount.toLocaleString("en-US", { style: "currency", currency: "USD" })}</strong>
                 </td>
               </tr>
             </tbody>
@@ -296,10 +230,8 @@ const Transaction = () => {
                 <td>
                   <select name="category" value={formData.category} onChange={handleChange}>
                     <option value="">Select</option>
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
+                    {categories.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
                 </td>
@@ -320,9 +252,7 @@ const Transaction = () => {
       </div>
 
       <div className="transaction-controls">
-        <button className="download-btn" onClick={handleDownloadCSV}>
-          Download CSV
-        </button>
+        <button className="download-btn" onClick={handleDownloadCSV}>Download CSV</button>
         <div className="date-filter">
           <label>From:</label>
           <input type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)} />

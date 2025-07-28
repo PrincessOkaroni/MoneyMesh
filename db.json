@@ -47,6 +47,12 @@
       "firstName": "James",
       "email": "james23@gmail.com",
       "password": "1101"
+    },
+    {
+      "id": "73e1",
+      "firstName": "George",
+      "email": "george@gmail.com",
+      "password": "were"
     }
   ],
   "budgets": [
@@ -94,6 +100,15 @@
       "duration": "Weekly",
       "creationDate": "2025-07-25T21:21:57.446Z",
       "startDate": "2025-07-25T21:21:57.446Z"
+    },
+    {
+      "id": "25cb",
+      "category": "Entertainment",
+      "limit": 7000,
+      "duration": "Monthly",
+      "spent": 8000,
+      "creationDate": "2025-07-28T05:28:48.778Z",
+      "startDate": "2025-07-28T05:28:48.778Z"
     }
   ],
   "transactions": [
@@ -102,7 +117,7 @@
       "type": "Income",
       "date": "2025-07-10",
       "category": "Bills",
-      "description": "Salary",
+      "description": "water ",
       "amount": 500
     },
     {
@@ -112,6 +127,14 @@
       "category": "Entertainment",
       "description": "Movie ticket",
       "amount": 50
+    },
+    {
+      "id": "989e",
+      "type": "Income",
+      "date": "2025-05-07",
+      "category": "Bills",
+      "description": "rent",
+      "amount": 4000
     }
   ]
 }
