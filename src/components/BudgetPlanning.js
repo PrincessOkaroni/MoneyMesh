@@ -4,7 +4,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import logo from '../assets/moneymesh-logo.png';
 
 const categories = ['Investment and Savings', 'Bills', 'General Upkeep', 'Entertainment', 'Others'];
-const baseURL = 'http://localhost:3001/budgets';
+const baseURL = 'https://moneymesh.onrender.com';
 
 const BudgetPlanning = () => {
   const navigate = useNavigate();
@@ -13,18 +13,15 @@ const BudgetPlanning = () => {
   const [message, setMessage] = useState('');
   const [editingBudget, setEditingBudget] = useState(null);
 
-  // Get user from localStorage
   const user = JSON.parse(localStorage.getItem('user')) || {};
 
-  // Redirect to login if no user is found
   useEffect(() => {
     if (!user.firstName) {
       navigate('/login');
       return;
     }
 
-    // Fetch budgets from API
-    fetch(baseURL)
+    fetch(`${baseURL}/budgets`)
       .then(res => {
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         return res.json();
@@ -52,9 +49,8 @@ const BudgetPlanning = () => {
     }
 
     if (editingBudget) {
-      // Editing existing budget
       const updated = { ...editingBudget, ...formData, limit };
-      fetch(`${baseURL}/${editingBudget.id}`, {
+      fetch(`${baseURL}/budgets/${editingBudget.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updated)
@@ -76,7 +72,6 @@ const BudgetPlanning = () => {
           setTimeout(() => setMessage(''), 2000);
         });
     } else {
-      // Adding new budget
       const newBudget = {
         ...formData,
         limit,
@@ -84,7 +79,7 @@ const BudgetPlanning = () => {
         creationDate: new Date().toISOString(),
         startDate: new Date().toISOString()
       };
-      fetch(baseURL, {
+      fetch(`${baseURL}/budgets`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newBudget)
@@ -108,7 +103,7 @@ const BudgetPlanning = () => {
   };
 
   const handleDelete = (id) => {
-    fetch(`${baseURL}/${id}`, { method: 'DELETE' })
+    fetch(`${baseURL}/budgets/${id}`, { method: 'DELETE' })
       .then(res => {
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         setBudgets(budgets.filter(b => b.id !== id));
@@ -130,12 +125,12 @@ const BudgetPlanning = () => {
       return;
     }
     const depositAmount = parseFloat(amount);
-    const updated = { ...budget, spent: budget.spent + depositAmount };
+    const updatedSpent = budget.spent + depositAmount;
 
-    fetch(`${baseURL}/${budget.id}`, {
+    fetch(`${baseURL}/budgets/${budget.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ spent: updated.spent })
+      body: JSON.stringify({ spent: updatedSpent })
     })
       .then(res => {
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -185,18 +180,10 @@ const BudgetPlanning = () => {
           <span className="brand">MoneyMesh</span>
         </div>
         <div className="nav-tabs">
-          <NavLink to="/overview" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
-            Overview
-          </NavLink>
-          <NavLink to="/transactions" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
-            Transactions
-          </NavLink>
-          <NavLink to="/budget-planning" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>
-            Budget Planning
-          </NavLink>
-          <button onClick={() => { localStorage.removeItem('user'); navigate('/login'); }} className="btn btn-signout">
-            Sign Out
-          </button>
+          <NavLink to="/overview" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>Overview</NavLink>
+          <NavLink to="/transactions" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>Transactions</NavLink>
+          <NavLink to="/budget-planning" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab-active' : ''}`}>Budget Planning</NavLink>
+          <button onClick={() => { localStorage.removeItem('user'); navigate('/login'); }} className="btn btn-signout">Sign Out</button>
         </div>
         <div className="profile-section">
           <img src="https://i.pravatar.cc/40" alt="User" className="profile-pic" />
@@ -210,11 +197,7 @@ const BudgetPlanning = () => {
       {message && <p className="message">{message}</p>}
 
       <form onSubmit={handleAddOrUpdateBudget}>
-        <select
-          value={formData.category}
-          onChange={e => setFormData({ ...formData, category: e.target.value })}
-          required
-        >
+        <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} required>
           <option value="">Select Category</option>
           {categories.map(cat => (
             <option key={cat} value={cat}>{cat}</option>
@@ -227,11 +210,7 @@ const BudgetPlanning = () => {
           onChange={e => setFormData({ ...formData, limit: e.target.value })}
           required
         />
-        <select
-          value={formData.duration}
-          onChange={e => setFormData({ ...formData, duration: e.target.value })}
-          required
-        >
+        <select value={formData.duration} onChange={e => setFormData({ ...formData, duration: e.target.value })} required>
           <option value="">Select Duration</option>
           <option value="Weekly">Weekly</option>
           <option value="Monthly">Monthly</option>
@@ -267,25 +246,13 @@ const BudgetPlanning = () => {
               <td>{b.limit - b.spent}</td>
               <td>{getStatus(b)}</td>
               <td>
-                <div style={{
-                  background: '#ddd',
-                  height: '10px',
-                  width: '100px',
-                  borderRadius: '4px',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    width: `${Math.min((b.spent / b.limit) * 100, 100)}%`,
-                    background: getProgressColor(b),
-                    height: '100%'
-                  }}></div>
+                <div style={{ background: '#ddd', height: '10px', width: '100px', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ width: `${Math.min((b.spent / b.limit) * 100, 100)}%`, background: getProgressColor(b), height: '100%' }}></div>
                 </div>
               </td>
               <td>{getDaysRemaining(b)}</td>
               <td>
-                <button onClick={() => { setEditingBudget(b); setFormData({ category: b.category, limit: b.limit.toString(), duration: b.duration }); }}>
-                  Edit
-                </button>
+                <button onClick={() => { setEditingBudget(b); setFormData({ category: b.category, limit: b.limit.toString(), duration: b.duration }); }}>Edit</button>
                 <button onClick={() => handleDelete(b.id)}>Delete</button>
                 <button onClick={() => handleDeposit(b)}>Deposit</button>
               </td>
