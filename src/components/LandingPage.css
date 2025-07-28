@@ -4,8 +4,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  background-color: #ffffff;
+  background-color: #16a34a;   /* dark green navbar */
+  color: #ffffff;
 }
 
 .logo-container {
@@ -21,7 +21,7 @@
 .brand {
   font-size: 24px;
   font-weight: bold;
-  color: #16a34a; 
+  color: #ffffff;              /* brand text in white */
 }
 
 .nav-links {
@@ -32,29 +32,45 @@
 .nav-links a {
   margin: 0 10px;
   text-decoration: none;
-  color: #444;
+  color: #ffffff;             /* make links white */
   font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: #a7f3d0;             /* light green on hover */
 }
 
 .nav-links .sign-in {
   margin-left: 10px;
   padding: 6px 12px;
-  border: 1px solid #16a34a;
+  border: 1px solid #ffffff;
   background: none;
-  color: #16a34a;
+  color: #ffffff;
   border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.nav-links .sign-in:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .nav-links .get-started {
   margin-left: 10px;
   padding: 8px 14px;
-  background-color: #16a34a;
-  color: #fff;
+  background-color: #ffffff;
+  color: #16a34a;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
+
+.nav-links .get-started:hover {
+  background-color: #e2e8f0;
+}
+
 .hero {
   display: flex;
   flex-wrap: wrap;
@@ -339,4 +355,18 @@ background-color:#c9f1d5;
   max-width: 300px;
   height: auto;
   margin-top: 20px;
+}
+.nav-links .get-started {
+  margin-left: 10px;
+  padding: 8px 14px;
+  background-color: #22c55e;  /* bright green button */
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.nav-links .get-started:hover {
+  background-color: #16a34a;  /* darker green on hover */
 }

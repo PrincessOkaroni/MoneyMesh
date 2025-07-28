@@ -1,9 +1,13 @@
 .budget-planning-container {
   padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  min-height: 100vh;        /* fill the entire viewport height */
+  width: 100%;              /* stretch across full width */
+  margin: 0;                /* remove auto margin that centers the container */
   background-color: #f9fafb;
+  display: flex;
+  flex-direction: column;
 }
+
 
 /* Navbar */
 .navbar {
