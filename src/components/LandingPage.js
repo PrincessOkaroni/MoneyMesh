@@ -141,7 +141,9 @@ function SignInForm() {
     e.preventDefault();
 
     // Fetch users from db.json to validate
-    fetch('http://localhost:3001/users')
+   fetch('https://moneymesh.onrender.com/users')
+
+      
       .then(res => res.json())
       .then(users => {
         const user = users.find(u => u.email === email && u.password === password);
@@ -198,7 +200,7 @@ function SignUpForm({ setShowSignIn, setShowSignUp }) {
 
     const newUser = { firstName, email, password };
 
-    fetch('http://localhost:3001/users', {
+      fetch('https://moneymesh.onrender.com/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newUser)

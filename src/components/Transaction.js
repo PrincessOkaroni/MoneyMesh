@@ -4,7 +4,8 @@ import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/moneymesh-logo.png";
 import { useFinancial } from "../App";
 
-const apiUrl = "http://localhost:3001/transactions";
+const apiUrl = "https://moneymesh.onrender.com/transactions";
+
 const categories = ["Bills", "Entertainment", "Investment and Savings", "General Upkeep", "Others"];
 
 const Transaction = () => {
